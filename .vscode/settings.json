@@ -1,0 +1,32 @@
+{
+  // ---- 文字コード (JSP / Java ともに UTF-8 で統一) ----
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+
+  // ---- ファイルの種類 ----
+  // *.jsp は JSP 拡張機能が担当するため、ここでは指定しない。
+  // *.tag (タグファイル) は対応する拡張機能が無いので HTML として扱う。
+  "files.associations": {
+    "*.tag": "html",
+    "*.tld": "xml"
+  },
+  "emmet.includeLanguages": {
+    "jsp": "html"
+  },
+
+  // ---- Java ----
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.compile.nullAnalysis.mode": "disabled",
+  "java.project.sourcePaths": ["src/main/java"],
+
+  // ---- 検索から除外 ----
+  "files.exclude": {
+    "**/target": true
+  },
+  "search.exclude": {
+    "**/target": true,
+    "**/src/main/webapp/assets/vendor": true
+  }
+}

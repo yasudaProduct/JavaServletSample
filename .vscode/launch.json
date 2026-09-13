@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // docker compose で起動している Tomcat にデバッガを接続する。
+      //   1. `docker compose up -d --build` で起動
+      //   2. ブレークポイントを置く
+      //   3. この構成を実行 (F5)
+      "type": "java",
+      "name": "Tomcat にアタッチ (Docker:8000)",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 8000,
+      "projectName": "servlet-sample"
+    }
+  ]
+}

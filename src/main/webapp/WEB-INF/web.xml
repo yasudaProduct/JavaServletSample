@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                             http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+  <display-name>Java Servlet サンプル集</display-name>
+
+  <!-- ===================================================================
+       サイト共通の設定値
+       JSP からは ${initParam.siteTitle} のように参照できます。
+       =================================================================== -->
+  <context-param>
+    <param-name>siteTitle</param-name>
+    <param-value>Java Servlet サンプル集</param-value>
+  </context-param>
+  <context-param>
+    <param-name>siteDescription</param-name>
+    <param-value>JSP / Servlet / Bootstrap 4 で作る Web システムのサンプル集</param-value>
+  </context-param>
+  <context-param>
+    <param-name>githubUrl</param-name>
+    <param-value>https://github.com/yasudaProduct/JavaServletSample</param-value>
+  </context-param>
+
+  <!-- ===================================================================
+       文字コード (Servlet 4.0 の機能。フィルタを書かなくても UTF-8 になる)
+       =================================================================== -->
+  <request-character-encoding>UTF-8</request-character-encoding>
+  <response-character-encoding>UTF-8</response-character-encoding>
+
+  <!-- ===================================================================
+       JSP 共通設定
+       =================================================================== -->
+  <jsp-config>
+    <jsp-property-group>
+      <url-pattern>*.jsp</url-pattern>
+      <page-encoding>UTF-8</page-encoding>
+      <!-- ディレクティブの改行が HTML に出力されないようにする -->
+      <trim-directive-whitespaces>true</trim-directive-whitespaces>
+      <!-- 古い書き方 (スクリプトレット) を使わない方針であれば true にする -->
+      <scripting-invalid>false</scripting-invalid>
+    </jsp-property-group>
+  </jsp-config>
+
+  <!-- ===================================================================
+       セッション
+       =================================================================== -->
+  <session-config>
+    <session-timeout>30</session-timeout>
+    <cookie-config>
+      <http-only>true</http-only>
+    </cookie-config>
+    <tracking-mode>COOKIE</tracking-mode>
+  </session-config>
+
+  <!-- ===================================================================
+       エラーページ
+       =================================================================== -->
+  <error-page>
+    <error-code>404</error-code>
+    <location>/WEB-INF/views/error/404.jsp</location>
+  </error-page>
+  <error-page>
+    <error-code>500</error-code>
+    <location>/WEB-INF/views/error/500.jsp</location>
+  </error-page>
+  <error-page>
+    <exception-type>java.lang.Throwable</exception-type>
+    <location>/WEB-INF/views/error/500.jsp</location>
+  </error-page>
+
+  <!-- ===================================================================
+       静的ファイルの MIME タイプ
+       =================================================================== -->
+  <mime-mapping>
+    <extension>svg</extension>
+    <mime-type>image/svg+xml</mime-type>
+  </mime-mapping>
+
+</web-app>

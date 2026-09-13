@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Docker: 起動 (ビルド込み)",
+      "type": "shell",
+      "command": "docker compose up -d --build",
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "Docker: 停止",
+      "type": "shell",
+      "command": "docker compose down",
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: ログを表示",
+      "type": "shell",
+      "command": "docker compose logs -f tomcat",
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "Maven: package",
+      "type": "shell",
+      "command": "mvn -B clean package",
+      "problemMatcher": ["$maven"],
+      "group": "build"
+    },
+    {
+      "label": "Maven: test",
+      "type": "shell",
+      "command": "mvn -B test",
+      "problemMatcher": ["$maven"],
+      "group": "test"
+    }
+  ]
+}

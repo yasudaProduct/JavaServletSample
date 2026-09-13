@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                            http://xmlns.jcp.org/xml/ns/javaee/web-jsptaglibrary_2_3.xsd"
+        version="2.3">
+
+  <description>Java Servlet サンプル集で使う独自タグ</description>
+  <tlib-version>1.0</tlib-version>
+  <short-name>site</short-name>
+  <uri>http://example.com/jsp/servlet-sample</uri>
+
+  <tag>
+    <description>ソースファイルを行番号つきで表示する</description>
+    <name>source</name>
+    <tag-class>com.example.servletsample.web.tag.SourceTag</tag-class>
+    <body-content>empty</body-content>
+    <attribute>
+      <description>ServletContext からの相対パス (/WEB-INF/ 配下のみ)</description>
+      <name>path</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+    </attribute>
+    <attribute>
+      <description>見出しに表示するファイル名 (省略時はパスから自動)</description>
+      <name>label</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+    </attribute>
+    <attribute>
+      <description>highlight.js に渡す言語名 (java / xml / css / javascript など)</description>
+      <name>language</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+    </attribute>
+  </tag>
+
+</taglib>

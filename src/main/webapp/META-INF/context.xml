@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Tomcat のコンテキスト設定。
+  reloadable="true" にしておくと、WEB-INF/classes のクラスを入れ替えたときに
+  Tomcat が自動でアプリを再読み込みします (開発用の設定です)。
+-->
+<Context reloadable="true">
+  <!-- 開発時に JSP の変更をすぐ反映させたい場合の目安。Tomcat 既定は 4 秒間隔でチェック -->
+  <Resources cachingAllowed="true" cacheMaxSize="10240" />
+</Context>

@@ -1,0 +1,10 @@
+{
+  // このプロジェクトを開いたときに VS Code が薦める拡張機能
+  "recommendations": [
+    "vscjava.vscode-java-pack",        // Java 一式 (言語サポート / デバッグ / Maven / テスト)
+    "samuelweinhardt.vscode-jsp-lang", // JSP のシンタックスハイライト
+    "redhat.vscode-xml",               // web.xml / pom.xml / TLD の補完
+    "ms-azuretools.vscode-docker",     // Dockerfile / docker-compose の操作
+    "editorconfig.editorconfig"        // .editorconfig の適用
+  ]
+}

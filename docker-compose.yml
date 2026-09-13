@@ -1,0 +1,51 @@
+# Java Servlet サンプル集 : 開発用 Docker 構成
+#
+#   docker compose up --build   … ビルドして起動 (http://localhost:8080/)
+#   docker compose down         … 停止
+#
+# JSP / CSS / JS / Java ソースはホスト側をマウントしているので、
+# 画面まわりの修正はブラウザの再読み込みだけで反映されます。
+# (Java のクラスを修正した場合のみ `docker compose up --build -d` で再ビルド)
+services:
+  tomcat:
+    build:
+      context: .
+      dockerfile: docker/tomcat/Dockerfile
+    image: javaservletsample/tomcat:local
+    container_name: servlet-sample-tomcat
+    ports:
+      - "8080:8080"   # アプリケーション
+      - "8000:8000"   # リモートデバッグ (JPDA)
+    volumes:
+      # --- ここをホストから差し替えることでホットリロードを実現 ---
+      - ./src/main/webapp/WEB-INF/views:/usr/local/tomcat/webapps/ROOT/WEB-INF/views:ro
+      - ./src/main/webapp/WEB-INF/tags:/usr/local/tomcat/webapps/ROOT/WEB-INF/tags:ro
+      - ./src/main/webapp/assets:/usr/local/tomcat/webapps/ROOT/assets:ro
+      # ソースコード表示用 (画面に出しているコードを常に最新にする)
+      - ./src/main/java:/usr/local/tomcat/webapps/ROOT/WEB-INF/sources/java:ro
+    environment:
+      TZ: Asia/Tokyo
+    healthcheck:
+      # curl の有無に依存しないよう bash のネットワークリダイレクトで確認する
+      test: ["CMD-SHELL", "timeout 3 bash -c '</dev/tcp/localhost/8080' || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # ローカルに Maven / JDK を入れずに mvn を実行したいとき用
+  #   docker compose run --rm maven -B clean package
+  #   docker compose run --rm maven -B test
+  maven:
+    image: maven:3.9-eclipse-temurin-17
+    profiles: ["tools"]
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - maven-repo:/root/.m2
+    entrypoint: ["mvn"]
+    command: ["-B", "clean", "package"]
+
+volumes:
+  maven-repo:
