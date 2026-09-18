@@ -1,0 +1,57 @@
+/**
+ * Cloudflare Workers / Containers の設定。
+ *
+ *   npx wrangler dev      … ローカルで動かす (Docker が必要)
+ *   npx wrangler deploy   … 本番へデプロイする
+ *
+ * 本番へのデプロイは GitHub Actions (.github/workflows/deploy.yml) が
+ * main ブランチへの push をきっかけに自動で実行します。
+ * 手順は docs/DEPLOY.md を参照してください。
+ */
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "java-servlet-sample",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-16",
+
+  // Workers のログ (console.log / 例外) をダッシュボードに残す
+  "observability": {
+    "enabled": true
+  },
+
+  "containers": [
+    {
+      "class_name": "TomcatContainer",
+
+      // ここに書いた Dockerfile を wrangler が Docker でビルドし、
+      // Cloudflare のレジストリへ push します。
+      "image": "./docker/cloudflare/Dockerfile",
+      // ビルドコンテキストはリポジトリのルート (pom.xml / src が要るため)
+      "image_build_context": ".",
+
+      // basic = 1/4 vCPU / 1 GiB メモリ / 4 GB ディスク。
+      // 起動が遅い・メモリが足りない場合は "standard-1" (1/2 vCPU / 4 GiB) へ。
+      "instance_type": "basic",
+
+      // Worker 側で 1 つのコンテナに集約しているので 1 で十分 (= 費用の上限にもなる)
+      "max_instances": 1
+    }
+  ],
+
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "TOMCAT",
+        "class_name": "TomcatContainer"
+      }
+    ]
+  },
+
+  // コンテナ付き Durable Object は new_sqlite_classes で登録する
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["TomcatContainer"]
+    }
+  ]
+}

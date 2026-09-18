@@ -21,3 +21,8 @@ Thumbs.db
 logs/
 work/
 *.log
+
+# ---- Cloudflare / Node ----
+node_modules/
+.wrangler/
+.dev.vars

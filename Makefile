@@ -34,4 +34,16 @@ clean: ## ビルド成果物とコンテナを削除する
 	mvn -B clean || true
 	docker compose down -v
 
-.PHONY: help up down restart logs shell build test dbuild clean
+# ---- Cloudflare へのデプロイ ----
+# 通常は main への push で GitHub Actions が自動実行します (docs/DEPLOY.md)
+
+deploy: ## Cloudflare へデプロイする (要 Docker / wrangler login)
+	npx wrangler deploy
+
+cf-dev: ## Cloudflare の構成でローカル起動する (要 Docker)
+	npx wrangler dev
+
+cf-logs: ## 本番の Worker のログを追う
+	npx wrangler tail
+
+.PHONY: help up down restart logs shell build test dbuild clean deploy cf-dev cf-logs

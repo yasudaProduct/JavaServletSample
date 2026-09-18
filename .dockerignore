@@ -1,4 +1,5 @@
 .git
+.github
 .gitignore
 .vscode
 .idea
@@ -6,3 +7,9 @@ target
 docs
 *.md
 !README.md
+
+# ---- Cloudflare / Node ----
+# Docker のビルドコンテキストに入れる必要が無いもの
+node_modules
+.wrangler
+worker

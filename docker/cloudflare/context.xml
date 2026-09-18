@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Cloudflare Containers (本番) 用の Tomcat コンテキスト設定。
+
+  開発用 (src/main/webapp/META-INF/context.xml) は reloadable="true" にして
+  クラスの入れ替えを Tomcat に自動検知させていますが、本番では不要なので
+  false にします。Tomcat が裏で変更チェックを回さなくなる分だけ軽くなります。
+-->
+<Context reloadable="false">
+  <Resources cachingAllowed="true" cacheMaxSize="10240" />
+</Context>

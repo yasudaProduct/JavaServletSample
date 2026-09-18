@@ -1,0 +1,102 @@
+# =====================================================================
+# main ブランチへの push をきっかけに Cloudflare へデプロイする
+#
+#   1. test   … Maven のテストと Worker の型チェック (ここが落ちたら止まる)
+#   2. deploy … wrangler が Docker イメージをビルドして Cloudflare へ反映
+#
+# 事前に必要な設定 (GitHub Secrets / Cloudflare 側の準備) は
+# docs/DEPLOY.md にまとめてあります。
+# =====================================================================
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  # Actions タブから手動でも流せるようにしておく
+  workflow_dispatch:
+
+# デプロイが同時に走らないようにする。
+# Containers はローリング更新のため、重なると不安定になります。
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # -------------------------------------------------------------------
+  # 1. テスト
+  # -------------------------------------------------------------------
+  test:
+    name: テスト
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: リポジトリを取得する
+        uses: actions/checkout@v7
+
+      - name: JDK 17 を用意する
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Maven でビルドとテストを行う
+        run: mvn -B --no-transfer-progress verify
+
+      - name: Node.js を用意する
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: npm の依存関係を入れる
+        run: npm ci
+
+      - name: Worker の型をチェックする
+        run: npm run typecheck
+
+  # -------------------------------------------------------------------
+  # 2. デプロイ
+  # -------------------------------------------------------------------
+  deploy:
+    name: デプロイ
+    needs: test
+    runs-on: ubuntu-latest
+    # Docker イメージのビルドと push があるため長めに取る
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - name: リポジトリを取得する
+        uses: actions/checkout@v7
+
+      - name: Node.js を用意する
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: npm の依存関係を入れる
+        run: npm ci
+
+      # wrangler deploy が下記をまとめて行います。
+      #   - worker/index.ts のバンドル
+      #   - docker/cloudflare/Dockerfile のビルド (Docker は runner に同梱)
+      #   - Cloudflare のレジストリへイメージを push
+      #   - Worker とコンテナの更新
+      - name: Cloudflare へデプロイする
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # package.json の wrangler とバージョンを揃えて、
+          # ローカルと CI で同じ結果になるようにする
+          wranglerVersion: '4.132.0'
+
+      - name: デプロイ先の URL を表示する
+        run: echo "デプロイ先 ${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"

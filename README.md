@@ -65,9 +65,13 @@ docker compose down            # 停止
 ```
 JavaServletSample/
 ├── docker-compose.yml           起動設定（ポート・マウント）
-├── docker/tomcat/Dockerfile     Maven でビルド → Tomcat 9 に配置
+├── docker/tomcat/               開発用（Maven でビルド → Tomcat 9 に配置）
+├── docker/cloudflare/           本番用（Cloudflare Containers 向け）
 ├── pom.xml                      Maven の設定
 ├── Makefile                     よく使うコマンド
+├── wrangler.jsonc               Cloudflare の設定（デプロイ先）
+├── worker/index.ts              Cloudflare Worker（コンテナへの入口）
+├── .github/workflows/           GitHub Actions（main への push でデプロイ）
 ├── docs/                        追加ドキュメント
 ├── .vscode/                     VS Code の設定・デバッグ構成
 └── src/
@@ -155,7 +159,30 @@ docker compose run --rm maven -B test
 
 ---
 
-## 7. 困ったとき
+## 7. デプロイ
+
+`main` ブランチに push すると、GitHub Actions が **Cloudflare** へ自動でデプロイします。
+
+Cloudflare の Workers は Java を実行できないため、Tomcat は
+**Cloudflare Containers**（コンテナ実行環境）の上でそのまま動かし、
+Worker はリクエストを転送する入口として置いています。
+
+```
+ブラウザ → Cloudflare Worker → Cloudflare Container（Tomcat 9 + このアプリ）
+```
+
+```
+push (main)
+  ├─ テスト     mvn verify + Worker の型チェック
+  └─ デプロイ   Docker イメージをビルドして Cloudflare へ反映
+```
+
+初回だけ Cloudflare のプラン加入・API トークン作成・GitHub Secrets の登録が必要です。
+**手順と費用の目安は [docs/DEPLOY.md](docs/DEPLOY.md)** にまとめてあります。
+
+---
+
+## 8. 困ったとき
 
 | 症状 | 対処 |
 | --- | --- |
@@ -167,7 +194,7 @@ docker compose run --rm maven -B test
 
 ---
 
-## 8. 収録サンプル
+## 9. 収録サンプル
 
 | カテゴリ | 内容 |
 | --- | --- |
