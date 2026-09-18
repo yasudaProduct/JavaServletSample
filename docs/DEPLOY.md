@@ -210,6 +210,7 @@ Cloudflare Containers は **コンテナが起動している間だけ**課金�
 | `Failed to start container` が出る | メモリ不足の可能性。`instance_type` を `standard-1` に上げる |
 | 画面が 500 になる | `npx wrangler tail` でログを追う（ダッシュボードの Workers Logs でも見られる） |
 | デプロイは成功したのに古い画面が出る | Containers はローリング更新のため反映に数分かかることがある |
+| 初回デプロイ直後だけ 503 になる | コンテナの配置が終わっていない。`npx wrangler containers list` の STATE が `ready` になるまで数分待つ |
 
 ### ログを見る
 

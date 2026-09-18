@@ -51,10 +51,28 @@ export class TomcatContainer extends Container<Env> {
   override async fetch(request: Request): Promise<Response> {
     const state = await this.getState();
     if (!this.ctx.container?.running || state.status !== 'healthy') {
-      await this.startAndWaitForPorts({
-        ports: [TOMCAT_PORT],
-        cancellationOptions: { portReadyTimeoutMS: STARTUP_TIMEOUT_MS },
-      });
+      try {
+        await this.startAndWaitForPorts({
+          ports: [TOMCAT_PORT],
+          cancellationOptions: { portReadyTimeoutMS: STARTUP_TIMEOUT_MS },
+        });
+      } catch (error) {
+        // ここで例外を投げると Worker 自体のエラー (error code 1101) になり、
+        // ブラウザには Cloudflare の素っ気ない 500 画面が出てしまう。
+        // 初回デプロイ直後などコンテナをまだ確保できないことがあるので、
+        // 「あとで来てください」と分かる 503 を返す。
+        console.error('コンテナの起動に失敗しました:', error);
+        return new Response(
+          'サーバーを起動できませんでした。少し時間をおいて再度アクセスしてください。',
+          {
+            status: 503,
+            headers: {
+              'content-type': 'text/plain; charset=utf-8',
+              'retry-after': '30',
+            },
+          },
+        );
+      }
     }
     return super.fetch(request);
   }
