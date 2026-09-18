@@ -736,6 +736,28 @@ a.badge-category:hover {
   overflow-x: auto;
 }
 
+/* 解説やデモの中に置く短いコード片 (サンプルのソース表示とは別物) */
+.sample-note pre,
+pre.code-snippet {
+  font-family: var(--site-mono);
+  font-size: .8125rem;
+  line-height: 1.7;
+  background-color: #fafbfd;
+  border: 1px solid var(--site-border);
+  border-radius: 6px;
+  padding: .875rem 1rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.sample-note pre code,
+pre.code-snippet code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
 /* ---------------------------------------------------------------- 前後リンク */
 .sample-pager {
   display: flex;

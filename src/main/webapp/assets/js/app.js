@@ -19,7 +19,9 @@
     if (typeof window.hljs === 'undefined') {
       return;
     }
-    var blocks = document.querySelectorAll('.code-block__code code');
+    // ソースコード表示のほか、解説やデモに書いた短いコード片も色付けする
+    var blocks = document.querySelectorAll(
+      '.code-block__code code, .sample-note pre code, pre.code-snippet code');
     Array.prototype.forEach.call(blocks, function (block) {
       window.hljs.highlightElement(block);
     });

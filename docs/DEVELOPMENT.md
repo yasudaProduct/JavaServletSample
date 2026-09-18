@@ -8,6 +8,7 @@
 - [ホットリロードの仕組み](#ホットリロードの仕組み)
 - [リクエストの流れ](#リクエストの流れ)
 - [ソースコードを画面に表示している仕組み](#ソースコードを画面に表示している仕組み)
+- [組み込みデータベース](#組み込みデータベース)
 - [リモートデバッグ](#リモートデバッグ)
 - [Jakarta EE（Tomcat 10 以降）へ移行する場合](#jakarta-ee-tomcat-10-以降-へ移行する場合)
 
@@ -63,8 +64,13 @@ Java を変更したときだけ `docker compose up -d --build` が必要です�
    ├─ /search?q=...              → SearchServlet      → /WEB-INF/views/search.jsp
    ├─ /about                     → AboutServlet       → /WEB-INF/views/about.jsp
    │
-   ├─ /samples/basic/hello-world → HelloWorldServlet  → .../samples/basic/hello-world.jsp
+   ├─ /samples/basic/hello-world → HelloWorldServlet   → .../samples/basic/hello-world.jsp
    │                                （完全一致のマッピングが優先される）
+   ├─ /samples/design/modal-dialog        → ModalDialogServlet
+   ├─ /samples/list/search-list           → ProductListServlet
+   ├─ /samples/file/file-upload           → FileUploadServlet
+   ├─ /samples/file/file-upload/download  → FileDownloadServlet
+   │
    └─ /samples/**                → SampleDispatcherServlet
                                     カタログから URL を探して JSP へ転送
 ```
@@ -101,6 +107,32 @@ CSS や画像が 404 になるため使いません。
 （再ビルドしなくても）画面に表示されるソースは最新になります。
 
 読み込み対象は `/WEB-INF/` 配下に限定し、`..` を含むパスは弾いています（`SourceLoader`）。
+
+---
+
+## 組み込みデータベース
+
+「一覧・検索」と「ファイル」のサンプルは、**H2 Database** をアプリの中で動かしています
+（`jdbc:h2:mem:servlet-sample`）。DB サーバを別に立てずに済ませるための構成です。
+
+```
+common/Database.java            接続の入口 (DriverManager.getConnection)
+common/DatabaseInitializer.java 起動時にテーブルを用意し、停止時に DB を落とす
+samples/list/ProductDao.java    products テーブルの作成 + サンプルデータ投入
+samples/file/StoredFileDao.java uploaded_files テーブルの作成
+```
+
+- テーブルは `CREATE TABLE IF NOT EXISTS` で、**各サンプルの DAO が自分の分を作ります**。
+  そのため JUnit から DAO を直接呼んでも（Tomcat を起動しなくても）そのまま動きます。
+- 接続 URL の `DB_CLOSE_DELAY=-1` は「最後の接続を閉じても DB を消さない」指定です。
+  これが無いと `close()` のたびにテーブルごと消えます。
+- メモリ上で動かしているため、**アプリを再起動するとデータは消えます**。
+- アプリの停止時には `SHUTDOWN` を実行し、`WEB-INF/lib` から読み込んだ JDBC ドライバの
+  登録も解除しています（入れ替え時に「failed to unregister」の警告が出ないようにするため）。
+
+実務ではコネクションを毎回作らず、`META-INF/context.xml` に書いた JNDI の `DataSource`
+（コネクションプール）から借りるのが一般的です。ここでは JDBC の素の流れが見えるよう、
+`DriverManager` を直接使っています。
 
 ---
 

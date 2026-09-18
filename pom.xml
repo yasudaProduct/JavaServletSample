@@ -21,6 +21,7 @@
     <servlet-api.version>4.0.1</servlet-api.version>
     <jsp-api.version>2.3.3</jsp-api.version>
     <jstl.version>1.2</jstl.version>
+    <h2.version>2.2.224</h2.version>
     <junit.version>5.10.2</junit.version>
   </properties>
 
@@ -46,6 +47,17 @@
       <groupId>javax.servlet</groupId>
       <artifactId>jstl</artifactId>
       <version>${jstl.version}</version>
+    </dependency>
+
+    <!--
+      H2 Database : ファイルや一覧のサンプルで使う組み込みデータベース。
+      別途 DB サーバを立てなくても動くよう、メモリ上で動かしています
+      (WAR に同梱するため provided ではなく既定の compile スコープ)。
+    -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>${h2.version}</version>
     </dependency>
 
     <!-- テスト -->
