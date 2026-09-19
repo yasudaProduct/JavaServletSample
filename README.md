@@ -78,7 +78,7 @@ JavaServletSample/
     ├── main/
     │   ├── java/com/example/servletsample/
     │   │   ├── catalog/         サンプル一覧（目次）の仕組みと定義
-    │   │   ├── common/          共通処理（BaseServlet / ソース読み込み）
+    │   │   ├── common/          共通処理（BaseServlet / ソース読み込み / DB 接続）
     │   │   ├── web/             サイト自体の画面（トップ・カテゴリ・検索）
     │   │   ├── web/tag/         独自タグ（ソースコード表示）
     │   │   └── samples/         各サンプルの Servlet
@@ -124,6 +124,7 @@ Servlet が無いサンプルは `SampleDispatcherServlet` が JSP へ転送す�
 | サーバ | Apache Tomcat 9（Docker） |
 | API | Servlet 4.0 / JSP 2.3 / JSTL 1.2（`javax.*` 名前空間） |
 | 画面 | Bootstrap 4.6、jQuery 3.7（slim）、highlight.js 11 |
+| DB | H2 Database 2.2（組み込み・メモリ上で動作。別途 DB サーバは不要） |
 | ビルド | Maven（WAR） |
 | テスト | JUnit 5 |
 
@@ -189,7 +190,7 @@ push (main)
 | `port is already allocated` | 8080 番が使用中です。`docker-compose.yml` の `ports` を `"8081:8080"` などに変更してください |
 | JSP を直しても反映されない | Tomcat は数秒間隔で更新を見ています。数秒待って再読み込み。それでも変わらなければ `docker compose restart tomcat` |
 | Java を直しても反映されない | Java はビルドが必要です。`docker compose up -d --build` |
-| 画面が真っ白 / 500 エラー | `docker compose logs -f tomcat` にスタックトレースが出ます |
+| 画面が真っ白 / 500 エラー | `docker compose logs -f tomcat` にスタックトレースが出ます。Java を変更した直後なら `docker compose up -d --build` で再ビルドしてください（JSP だけ新しく Java が古いと、画面の途中で止まることがあります） |
 | 文字化けする | ファイルを UTF-8 で保存しているか確認してください（`.editorconfig` で UTF-8 に統一しています） |
 
 ---
@@ -207,7 +208,22 @@ push (main)
 | 非同期通信 | Ajax、JSON API との連携 |
 | 応用・その他 | フィルタ、エラー処理、国際化など |
 
-現在は基盤の動作確認用に、以下の 2 件が入っています。サンプルはこれから追加していきます。
+現在は以下の 5 件が入っています。サンプルはこれから追加していきます。
 
-- **基本 / Hello World** … Servlet で値を用意して JSP へ転送する基本の流れ（Servlet あり）
-- **画面デザイン / Bootstrap 4 の基本パーツ** … グリッド・ボタン・カード・テーブル・フォーム（JSP のみ）
+| サンプル | 内容 |
+| --- | --- |
+| 基本 / **Hello World** | Servlet で値を用意して JSP へ転送する基本の流れ |
+| 画面デザイン / **Bootstrap 4 の基本パーツ** | グリッド・ボタン・カード・テーブル・フォーム（JSP のみ） |
+| 画面デザイン / **モーダルの出し方 4 パターン** | ボタンで開く確認モーダル、処理後の完了モーダル、画面遷移後のモーダル（PRG パターン）、確認 → 登録 → 完了モーダル → 画面遷移の一連の流れ |
+| 一覧・検索 / **検索つき一覧画面** | キーワード・カテゴリで絞り込み、並び替えとページングを行う一覧（SQL の `LIMIT` / `OFFSET`） |
+| ファイル / **アップロード・ダウンロード・削除** | 選んだファイルを DB の `BLOB` 列に保存し、一覧から取得・削除する |
+
+### データベースについて
+
+「一覧・検索」と「ファイル」のサンプルは **H2 Database** を使っています。
+アプリの中でメモリ上に動かす組み込みデータベースなので、
+`docker compose up` だけで動き、別途 DB サーバを用意する必要はありません。
+
+- 接続の入口は `common/Database.java`（`jdbc:h2:mem:servlet-sample`）
+- テーブルの作成とサンプルデータの投入は、それぞれのサンプルの DAO が行います
+- **アプリを再起動すると保存したデータは消えます**（サンプル用の割り切りです）
