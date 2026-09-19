@@ -27,6 +27,20 @@ public final class Database {
     private static final String USER = "sa";
     private static final String PASSWORD = "";
 
+    static {
+        // JDBC 4 以降はクラスパス上のドライバが DriverManager に自動登録されるが、
+        // Tomcat では WEB-INF/lib のドライバがその対象にならず、
+        // 接続時に「No suitable driver found」で失敗する。
+        // (Tomcat の JreMemoryLeakPreventionListener が、アプリを配備する前に
+        //  DriverManager を初期化してしまい、自動検出はその 1 回で終わってしまうため)
+        // そこで、使う前にドライバのクラスを自分で読み込んで登録させる。
+        try {
+            Class.forName("org.h2.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
     private Database() {
     }
 
