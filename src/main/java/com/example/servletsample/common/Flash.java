@@ -46,7 +46,21 @@ public final class Flash {
      * @param text    本文
      */
     public static void set(HttpServletRequest request, String variant, String title, String text) {
-        request.getSession().setAttribute(SESSION_KEY, new Message(variant, title, text));
+        set(request, variant, title, text, null);
+    }
+
+    /**
+     * 「知らせたあとに移動させたい画面」付きでメッセージを保存する。
+     *
+     * <p>完了モーダルを閉じたら一覧画面へ送る、といった流れで使います。
+     * 移動先は画面側 (JSP / {@code resultModal.tag}) が使うので、
+     * 指定しなければこれまで通りその場にとどまります。</p>
+     *
+     * @param nextUrl 完了を知らせたあとに移動させる URL (不要なら null)
+     */
+    public static void set(HttpServletRequest request, String variant, String title, String text,
+                           String nextUrl) {
+        request.getSession().setAttribute(SESSION_KEY, new Message(variant, title, text, nextUrl));
     }
 
     /**
@@ -74,11 +88,13 @@ public final class Flash {
         private final String variant;
         private final String title;
         private final String text;
+        private final String nextUrl;
 
-        Message(String variant, String title, String text) {
+        Message(String variant, String title, String text, String nextUrl) {
             this.variant = variant;
             this.title = title;
             this.text = text;
+            this.nextUrl = nextUrl == null ? "" : nextUrl;
         }
 
         /** Bootstrap の色 (success / danger / warning / info)。 */
@@ -94,6 +110,11 @@ public final class Flash {
         /** 本文。 */
         public String getText() {
             return text;
+        }
+
+        /** 知らせたあとに移動させる画面の URL。移動しない場合は空文字。 */
+        public String getNextUrl() {
+            return nextUrl;
         }
     }
 }

@@ -6,7 +6,9 @@ import java.util.List;
 import com.example.servletsample.common.Database;
 import com.example.servletsample.common.Flash;
 import com.example.servletsample.samples.basic.HelloWorldServlet;
+import com.example.servletsample.samples.design.ModalDialogEntriesServlet;
 import com.example.servletsample.samples.design.ModalDialogServlet;
+import com.example.servletsample.samples.design.ReceptionEntry;
 import com.example.servletsample.samples.file.FileDownloadServlet;
 import com.example.servletsample.samples.file.FileUploadServlet;
 import com.example.servletsample.samples.file.StoredFile;
@@ -61,11 +63,16 @@ final class SampleDefinitions {
                 .build());
 
         samples.add(Sample.builder("modal-dialog", Category.DESIGN)
-                .title("モーダル（ダイアログ）の出し方 3 パターン")
-                .summary("ボタンで開く確認モーダル、処理後の完了モーダル、画面遷移後に出すモーダル（PRG パターン）。")
-                .tags("Bootstrap4", "モーダル", "確認ダイアログ", "PRG", "フラッシュメッセージ", "リダイレクト")
+                .title("モーダル（ダイアログ）の出し方 4 パターン")
+                .summary("ボタンで開く確認モーダル、処理後の完了モーダル、画面遷移後に出すモーダル、"
+                        + "そして「確認 → 登録 → 完了モーダル → 画面遷移」の一連の流れ。")
+                .tags("Bootstrap4", "モーダル", "確認ダイアログ", "PRG", "フラッシュメッセージ",
+                        "リダイレクト", "画面遷移")
                 .source(ModalDialogServlet.class)
+                .source(ModalDialogEntriesServlet.class)
+                .source(ReceptionEntry.class)
                 .source(Flash.class)
+                .source(SourceFile.jsp("/WEB-INF/views/samples/design/modal-dialog-entries.jsp"))
                 .build());
 
         // ------------------------------------------------------------------
