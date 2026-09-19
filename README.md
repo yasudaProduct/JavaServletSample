@@ -190,7 +190,7 @@ push (main)
 | `port is already allocated` | 8080 番が使用中です。`docker-compose.yml` の `ports` を `"8081:8080"` などに変更してください |
 | JSP を直しても反映されない | Tomcat は数秒間隔で更新を見ています。数秒待って再読み込み。それでも変わらなければ `docker compose restart tomcat` |
 | Java を直しても反映されない | Java はビルドが必要です。`docker compose up -d --build` |
-| 画面が真っ白 / 500 エラー | `docker compose logs -f tomcat` にスタックトレースが出ます |
+| 画面が真っ白 / 500 エラー | `docker compose logs -f tomcat` にスタックトレースが出ます。Java を変更した直後なら `docker compose up -d --build` で再ビルドしてください（JSP だけ新しく Java が古いと、画面の途中で止まることがあります） |
 | 文字化けする | ファイルを UTF-8 で保存しているか確認してください（`.editorconfig` で UTF-8 に統一しています） |
 
 ---

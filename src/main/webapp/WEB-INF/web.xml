@@ -39,6 +39,13 @@
       <page-encoding>UTF-8</page-encoding>
       <!-- ディレクティブの改行が HTML に出力されないようにする -->
       <trim-directive-whitespaces>true</trim-directive-whitespaces>
+      <!--
+        画面を組み立てる途中でエラーが起きたときに、書きかけの HTML を捨てて
+        エラーページ (error/500.jsp) に差し替えられるようにするためのバッファです。
+        既定の 8kb だと画面の途中で送信が始まってしまうため、書きかけの HTML の後ろに
+        エラーページが継ぎ足される形になり、「画面が真っ白」に見えてしまいます。
+      -->
+      <buffer>64kb</buffer>
       <!-- 古い書き方 (スクリプトレット) を使わない方針であれば true にする -->
       <scripting-invalid>false</scripting-invalid>
     </jsp-property-group>
