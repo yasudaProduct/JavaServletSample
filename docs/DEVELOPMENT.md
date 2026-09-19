@@ -66,10 +66,19 @@ Java を変更したときだけ `docker compose up -d --build` が必要です�
    │
    ├─ /samples/basic/hello-world → HelloWorldServlet   → .../samples/basic/hello-world.jsp
    │                                （完全一致のマッピングが優先される）
+   ├─ /samples/basic/request-parameter    → RequestParameterServlet
+   ├─ /samples/basic/forward-redirect     → ForwardRedirectServlet
+   ├─ /samples/basic/scope                → ScopeServlet
+   ├─ /samples/basic/servlet-lifecycle    → LifecycleServlet
+   ├─ /samples/basic/jsp-basics           → JspBasicsServlet
    ├─ /samples/design/modal-dialog        → ModalDialogServlet
    ├─ /samples/list/search-list           → ProductListServlet
+   ├─ /samples/form/input-validation      → InputValidationServlet
+   ├─ /samples/form/realtime-validation   → RealtimeValidationServlet
    ├─ /samples/file/file-upload           → FileUploadServlet
    ├─ /samples/file/file-upload/download  → FileDownloadServlet
+   ├─ /samples/ajax/{ID}                  → 画面用の Servlet
+   ├─ /samples/ajax/{ID}/api              → JSON を返す Servlet
    │
    └─ /samples/**                → SampleDispatcherServlet
                                     カタログから URL を探して JSP へ転送

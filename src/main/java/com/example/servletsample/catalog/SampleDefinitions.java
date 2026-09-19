@@ -5,7 +5,24 @@ import java.util.List;
 
 import com.example.servletsample.common.Database;
 import com.example.servletsample.common.Flash;
+import com.example.servletsample.common.Json;
+import com.example.servletsample.common.ValidationErrors;
+import com.example.servletsample.samples.ajax.AjaxBasicsApiServlet;
+import com.example.servletsample.samples.ajax.AjaxBasicsServlet;
+import com.example.servletsample.samples.ajax.AjaxFormApiServlet;
+import com.example.servletsample.samples.ajax.AjaxFormServlet;
+import com.example.servletsample.samples.ajax.AjaxPollingApiServlet;
+import com.example.servletsample.samples.ajax.AjaxPollingServlet;
+import com.example.servletsample.samples.ajax.AjaxSearchApiServlet;
+import com.example.servletsample.samples.ajax.AjaxSearchServlet;
+import com.example.servletsample.samples.basic.ForwardRedirectGoalServlet;
+import com.example.servletsample.samples.basic.ForwardRedirectServlet;
 import com.example.servletsample.samples.basic.HelloWorldServlet;
+import com.example.servletsample.samples.basic.JspBasicsServlet;
+import com.example.servletsample.samples.basic.LifecycleCounterApiServlet;
+import com.example.servletsample.samples.basic.LifecycleServlet;
+import com.example.servletsample.samples.basic.RequestParameterServlet;
+import com.example.servletsample.samples.basic.ScopeServlet;
 import com.example.servletsample.samples.design.ModalDialogEntriesServlet;
 import com.example.servletsample.samples.design.ModalDialogServlet;
 import com.example.servletsample.samples.design.ReceptionEntry;
@@ -13,6 +30,9 @@ import com.example.servletsample.samples.file.FileDownloadServlet;
 import com.example.servletsample.samples.file.FileUploadServlet;
 import com.example.servletsample.samples.file.StoredFile;
 import com.example.servletsample.samples.file.StoredFileDao;
+import com.example.servletsample.samples.form.InputValidationServlet;
+import com.example.servletsample.samples.form.MemberForm;
+import com.example.servletsample.samples.form.RealtimeValidationServlet;
 import com.example.servletsample.samples.list.Page;
 import com.example.servletsample.samples.list.Product;
 import com.example.servletsample.samples.list.ProductDao;
@@ -53,6 +73,53 @@ final class SampleDefinitions {
                 .source(HelloWorldServlet.class)
                 .build());
 
+        samples.add(Sample.builder("request-parameter", Category.BASIC)
+                .title("リクエストパラメータの受け取り方")
+                .summary("画面から送られてきた値を getParameter / getParameterValues / getParameterMap で受け取る。"
+                        + "null と空文字の違い、チェックボックスの落とし穴、数値変換の例外対策まで。")
+                .tags("Servlet", "パラメータ", "フォーム", "GET", "POST", "getParameter", "EL")
+                .source(RequestParameterServlet.class)
+                .build());
+
+        samples.add(Sample.builder("forward-redirect", Category.BASIC)
+                .title("forward と redirect の違い")
+                .summary("同じ「注文を受け付ける」処理を forward と redirect の 2 通りで実行し、"
+                        + "URL・リクエストスコープ・履歴・再読み込みの違いを見比べます。")
+                .tags("forward", "redirect", "sendRedirect", "PRG", "リクエストスコープ", "画面遷移", "POST")
+                .source(ForwardRedirectServlet.class)
+                .source(ForwardRedirectGoalServlet.class)
+                .source(SourceFile.jsp("/WEB-INF/views/samples/basic/forward-redirect-goal.jsp"))
+                .build());
+
+        samples.add(Sample.builder("scope", Category.BASIC)
+                .title("スコープ (request / session / application)")
+                .summary("値をどこに置くかで、いつまで残り、誰に見えるかが変わる。"
+                        + "3 つのスコープに同じ値を入れて、開き直したり破棄したりしながら違いを確かめます。")
+                .tags("スコープ", "リクエストスコープ", "セッション", "ServletContext", "EL", "invalidate",
+                        "スレッドセーフ")
+                .source(ScopeServlet.class)
+                .build());
+
+        samples.add(Sample.builder("servlet-lifecycle", Category.BASIC)
+                .title("Servlet のライフサイクルとスレッド")
+                .summary("Servlet はアプリ全体で 1 インスタンス。そこへリクエストごとの別スレッドが同時に入ってきます。"
+                        + "init / service / destroy の流れと、インスタンス変数を共有したときに起きる数のずれを体験します。")
+                .tags("Servlet", "ライフサイクル", "スレッド", "init", "loadOnStartup", "AtomicInteger",
+                        "スレッドセーフ", "JSON")
+                .source(LifecycleServlet.class)
+                .source(LifecycleCounterApiServlet.class)
+                .source(Json.class)
+                .build());
+
+        samples.add(Sample.builder("jsp-basics", Category.BASIC)
+                .title("EL と JSTL の基本")
+                .summary("EL の書き方と JSTL (core / fmt / functions) の使い方を、書いた EL とその結果を並べて確かめる。"
+                        + "エスケープあり / なしの見え方の違いも比較できます。")
+                .tags("JSP", "EL", "JSTL", "c:forEach", "c:choose", "c:set", "fn:escapeXml",
+                        "fmt:formatNumber", "XSS")
+                .source(JspBasicsServlet.class)
+                .build());
+
         // ------------------------------------------------------------------
         // 画面デザイン
         // ------------------------------------------------------------------
@@ -63,16 +130,39 @@ final class SampleDefinitions {
                 .build());
 
         samples.add(Sample.builder("modal-dialog", Category.DESIGN)
-                .title("モーダル（ダイアログ）の出し方 4 パターン")
+                .title("モーダル（ダイアログ）の出し方 6 パターン")
                 .summary("ボタンで開く確認モーダル、処理後の完了モーダル、画面遷移後に出すモーダル、"
-                        + "そして「確認 → 登録 → 完了モーダル → 画面遷移」の一連の流れ。")
-                .tags("Bootstrap4", "モーダル", "確認ダイアログ", "PRG", "フラッシュメッセージ",
-                        "リダイレクト", "画面遷移")
+                        + "「確認 → 登録 → 完了モーダル → 画面遷移」の流れ、"
+                        + "さらにモーダルで入力した内容や検索して選んだ行を元の画面のフォームへ渡すパターン。")
+                .tags("Bootstrap4", "モーダル", "確認ダイアログ", "検索ダイアログ", "PRG", "フラッシュメッセージ",
+                        "リダイレクト", "画面遷移", "JavaScript")
                 .source(ModalDialogServlet.class)
                 .source(ModalDialogEntriesServlet.class)
                 .source(ReceptionEntry.class)
                 .source(Flash.class)
                 .source(SourceFile.jsp("/WEB-INF/views/samples/design/modal-dialog-entries.jsp"))
+                .build());
+
+        // ------------------------------------------------------------------
+        // フォーム・入力
+        // ------------------------------------------------------------------
+        samples.add(Sample.builder("input-validation", Category.FORM)
+                .title("入力チェック（サーバ側）")
+                .summary("送られてきた値をサーバ側だけで確かめる会員登録フォーム。"
+                        + "エラーは画面の先頭と各項目に出し、入力値は保持したまま返します。")
+                .tags("フォーム", "バリデーション", "POST", "エラー表示", "相関チェック", "PRG")
+                .source(InputValidationServlet.class)
+                .source(MemberForm.class)
+                .source(ValidationErrors.class)
+                .build());
+
+        samples.add(Sample.builder("realtime-validation", Category.FORM)
+                .title("入力チェック（フォーカスアウト時）")
+                .summary("フォーカスが外れた時点で JavaScript がその場でチェックし、"
+                        + "同じ内容をサーバ側でも確かめる。JavaScript を通さずに送るとどうなるかも試せます。")
+                .tags("フォーム", "バリデーション", "JavaScript", "blur", "アクセシビリティ", "文字数カウンタ")
+                .source(RealtimeValidationServlet.class)
+                .source(ValidationErrors.class)
                 .build());
 
         // ------------------------------------------------------------------
@@ -105,15 +195,64 @@ final class SampleDefinitions {
                 .build());
 
         // ------------------------------------------------------------------
+        // 非同期通信
+        // ------------------------------------------------------------------
+        samples.add(Sample.builder("ajax-basics", Category.AJAX)
+                .title("非同期通信の基本（fetch で JSON を取得）")
+                .summary("画面を読み込み直さずにサーバへ問い合わせ、返ってきた JSON で画面の一部だけを書き換える。"
+                        + "ローディング表示、404 / 500 のときの出方、通信できないときの扱いまで。")
+                .tags("Ajax", "fetch", "JSON", "非同期通信", "JavaScript", "エラー処理", "API")
+                .source(AjaxBasicsServlet.class)
+                .source(AjaxBasicsApiServlet.class)
+                .source(Json.class)
+                .build());
+
+        samples.add(Sample.builder("ajax-search", Category.AJAX)
+                .title("インクリメンタルサーチ（入力するたびに検索）")
+                .summary("入力のたびに JSON API を呼んで候補を出す検索欄。debounce で投げすぎを抑え、"
+                        + "AbortController と通し番号で古い応答の上書きを防ぎます。")
+                .tags("Ajax", "fetch", "JSON", "インクリメンタルサーチ", "debounce",
+                        "AbortController", "検索", "アクセシビリティ")
+                .source(AjaxSearchServlet.class)
+                .source(AjaxSearchApiServlet.class)
+                .build());
+
+        samples.add(Sample.builder("ajax-form", Category.AJAX)
+                .title("Ajax でフォームを送信する")
+                .summary("問い合わせフォームを画面遷移せずに送り、項目ごとのエラーと受付番号を JSON で受け取る。")
+                .tags("Ajax", "fetch", "POST", "フォーム", "バリデーション", "JSON", "二重送信")
+                .source(AjaxFormServlet.class)
+                .source(AjaxFormApiServlet.class)
+                .source(ValidationErrors.class)
+                .source(Json.class)
+                .build());
+
+        samples.add(Sample.builder("ajax-polling", Category.AJAX)
+                .title("処理の進捗をポーリングで取得する")
+                .summary("時間のかかる集計処理の進捗を 1 秒おきに問い合わせて進捗バーに反映する。"
+                        + "間隔の決め方、終了条件の作り方、画面を離れたときの止め方まで。")
+                .tags("Ajax", "ポーリング", "setInterval", "進捗バー", "JSON", "fetch", "セッション")
+                .source(AjaxPollingServlet.class)
+                .source(AjaxPollingApiServlet.class)
+                .build());
+
+        // ------------------------------------------------------------------
         // ここから下は「これから作るサンプル」の登録例です。
         // 状態を PLANNED にしておくと、一覧にグレー表示され、リンクは張られません。
         // 実際に作るときは status(...) を外して JSP を用意してください。
         // ------------------------------------------------------------------
-        samples.add(Sample.builder("input-validation", Category.FORM)
-                .title("入力チェック（バリデーション）")
-                .summary("必須・桁数・形式のチェックとエラーメッセージの表示。")
+        samples.add(Sample.builder("login", Category.SESSION)
+                .title("ログインとログアウト")
+                .summary("セッションにログイン情報を持たせ、未ログインなら弾く。")
                 .status(SampleStatus.PLANNED)
-                .tags("フォーム", "バリデーション", "POST")
+                .tags("セッション", "ログイン", "認証", "フィルタ")
+                .build());
+
+        samples.add(Sample.builder("error-handling", Category.ADVANCED)
+                .title("エラー処理とエラーページ")
+                .summary("例外が起きたときにどこで受け止め、何を画面に出すか。")
+                .status(SampleStatus.PLANNED)
+                .tags("エラー処理", "例外", "web.xml", "ログ")
                 .build());
 
         return samples;
