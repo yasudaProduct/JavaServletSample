@@ -39,16 +39,24 @@ import com.example.servletsample.samples.basic.ScopeServlet;
 import com.example.servletsample.samples.design.ModalDialogEntriesServlet;
 import com.example.servletsample.samples.design.ModalDialogServlet;
 import com.example.servletsample.samples.design.ReceptionEntry;
+import com.example.servletsample.samples.file.Csv;
+import com.example.servletsample.samples.file.CsvDownloadServlet;
+import com.example.servletsample.samples.file.CsvExportServlet;
+import com.example.servletsample.samples.file.CsvOptions;
 import com.example.servletsample.samples.file.FileDownloadServlet;
 import com.example.servletsample.samples.file.FileUploadServlet;
+import com.example.servletsample.samples.file.SalesRecord;
+import com.example.servletsample.samples.file.SalesRecords;
 import com.example.servletsample.samples.file.StoredFile;
 import com.example.servletsample.samples.file.StoredFileDao;
+import com.example.servletsample.samples.form.ConfirmFormServlet;
 import com.example.servletsample.samples.form.EmployeeMaster;
 import com.example.servletsample.samples.form.InputValidationServlet;
 import com.example.servletsample.samples.form.LeaveRequestForm;
 import com.example.servletsample.samples.form.LeaveType;
 import com.example.servletsample.samples.form.MemberForm;
 import com.example.servletsample.samples.form.RealtimeValidationServlet;
+import com.example.servletsample.samples.form.SeminarForm;
 import com.example.servletsample.samples.form.ValidationRulesServlet;
 import com.example.servletsample.samples.list.Page;
 import com.example.servletsample.samples.list.Product;
@@ -222,6 +230,17 @@ final class SampleDefinitions {
                 .source(ValidationErrors.class)
                 .build());
 
+        samples.add(Sample.builder("confirm-form", Category.FORM)
+                .title("入力 → 確認 → 完了（3 画面）")
+                .summary("業務システムで定番の流れ。値の持ち回りを隠し項目とセッションの 2 通りで試し、"
+                        + "確定時に検証をやり直す理由、二重送信をワンタイムトークンで防ぐ方法まで。")
+                .tags("フォーム", "確認画面", "PRG", "二重送信", "ワンタイムトークン", "hidden",
+                        "セッション", "POST", "XSS")
+                .source(ConfirmFormServlet.class)
+                .source(SeminarForm.class)
+                .source(Flash.class)
+                .build());
+
         // ------------------------------------------------------------------
         // 一覧・検索
         // ------------------------------------------------------------------
@@ -249,6 +268,21 @@ final class SampleDefinitions {
                 .source(StoredFileDao.class)
                 .source(StoredFile.class)
                 .source(SourceFile.jsp("/WEB-INF/tags/resultModal.tag"))
+                .build());
+
+        samples.add(Sample.builder("csv-download", Category.FILE)
+                .title("CSV ダウンロード（文字化け・エスケープ対策）")
+                .summary("「Excel で開いたら文字化けした」の正体は BOM。文字コード・改行・"
+                        + "エスケープの有無を切り替えながら、組み立てた CSV をその場で見比べます。"
+                        + "日本語のファイル名と CSV インジェクション対策まで。")
+                .tags("CSV", "ダウンロード", "文字コード", "BOM", "Shift_JIS", "エスケープ",
+                        "RFC4180", "Content-Disposition", "CSVインジェクション")
+                .source(CsvDownloadServlet.class)
+                .source(CsvExportServlet.class)
+                .source(Csv.class)
+                .source(CsvOptions.class)
+                .source(SalesRecord.class)
+                .source(SalesRecords.class)
                 .build());
 
         // ------------------------------------------------------------------
