@@ -25,6 +25,9 @@ public class SourceTag extends SimpleTagSupport {
     /** Java ソースを WAR に取り込んでいる場所。 */
     private static final String JAVA_ROOT = "/WEB-INF/sources/java/";
 
+    /** src/main/resources の中身がビルド後に置かれる場所。 */
+    private static final String CLASSES_ROOT = "/WEB-INF/classes/";
+
     private String path;
     private String label;
     private String language = "plaintext";
@@ -99,6 +102,10 @@ public class SourceTag extends SimpleTagSupport {
         }
         if (path.startsWith(JAVA_ROOT)) {
             return "src/main/java/" + path.substring(JAVA_ROOT.length());
+        }
+        if (path.startsWith(CLASSES_ROOT)) {
+            // properties などは src/main/resources に置いたものがここへコピーされる
+            return "src/main/resources/" + path.substring(CLASSES_ROOT.length());
         }
         return "src/main/webapp" + path;
     }

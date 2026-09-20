@@ -8,6 +8,17 @@ import com.example.servletsample.common.Flash;
 import com.example.servletsample.common.Json;
 import com.example.servletsample.common.ValidationErrors;
 import com.example.servletsample.common.Validators;
+import com.example.servletsample.samples.advanced.AccessCheckFilter;
+import com.example.servletsample.samples.advanced.AccessLogFilter;
+import com.example.servletsample.samples.advanced.ApplicationException;
+import com.example.servletsample.samples.advanced.ErrorHandlingApiServlet;
+import com.example.servletsample.samples.advanced.ErrorHandlingServlet;
+import com.example.servletsample.samples.advanced.FilterApiServlet;
+import com.example.servletsample.samples.advanced.FilterServlet;
+import com.example.servletsample.samples.advanced.FilterTrace;
+import com.example.servletsample.samples.advanced.FilterTraceStore;
+import com.example.servletsample.samples.advanced.I18nServlet;
+import com.example.servletsample.samples.advanced.RequestIdFilter;
 import com.example.servletsample.samples.ajax.AjaxBasicsApiServlet;
 import com.example.servletsample.samples.ajax.AjaxBasicsServlet;
 import com.example.servletsample.samples.ajax.AjaxFormApiServlet;
@@ -271,6 +282,62 @@ final class SampleDefinitions {
                 .build());
 
         // ------------------------------------------------------------------
+        // 応用・その他
+        // ------------------------------------------------------------------
+        samples.add(Sample.builder("error-handling", Category.ADVANCED)
+                .title("エラー処理とエラーページ")
+                .summary("入力の誤り・業務上の都合・システムの異常。どれをどこで受け止め、"
+                        + "何を画面に出すか。web.xml でのエラーページの割り当て、"
+                        + "JSP の errorPage 属性、非同期通信での返し方まで。")
+                .tags("エラー処理", "例外", "エラーページ", "web.xml", "sendError", "業務例外",
+                        "ログ", "errorPage", "Ajax")
+                .source(ErrorHandlingServlet.class)
+                .source(ApplicationException.class)
+                .source(ErrorHandlingApiServlet.class)
+                .source(Validators.class)
+                .source(SourceFile.of("/WEB-INF/web.xml", "web.xml", "xml"))
+                .source(SourceFile.jsp("/WEB-INF/tags/errorDetail.tag"))
+                .source(SourceFile.jsp("/WEB-INF/views/error/500.jsp"))
+                .source(SourceFile.jsp("/WEB-INF/views/error/error.jsp"))
+                .source(SourceFile.jsp("/WEB-INF/views/error/application-error.jsp"))
+                .source(SourceFile.jsp("/WEB-INF/views/samples/advanced/error-handling-jsp.jsp"))
+                .source(SourceFile.jsp("/WEB-INF/views/samples/advanced/error-handling-jsp-error.jsp"))
+                .build());
+
+        samples.add(Sample.builder("filter", Category.ADVANCED)
+                .title("フィルタ（Filter）で共通処理をはさむ")
+                .summary("Servlet の手前と奥に共通処理を差し込む。3 つのフィルタが"
+                        + "どの順に呼ばれるかを 1 往復ぶん記録して表示し、"
+                        + "chain.doFilter を呼ばずに止めるとどうなるかも確かめます。")
+                .tags("フィルタ", "Filter", "FilterChain", "web.xml", "アクセスログ",
+                        "dispatcher", "リクエストID", "レスポンスヘッダ", "スレッドセーフ")
+                .source(RequestIdFilter.class)
+                .source(AccessLogFilter.class)
+                .source(AccessCheckFilter.class)
+                .source(FilterServlet.class)
+                .source(FilterApiServlet.class)
+                .source(FilterTrace.class)
+                .source(FilterTraceStore.class)
+                .source(SourceFile.of("/WEB-INF/web.xml", "web.xml", "xml"))
+                .build());
+
+        samples.add(Sample.builder("i18n", Category.ADVANCED)
+                .title("国際化（多言語表示）")
+                .summary("画面の文字を properties にまとめ、ロケールで切り替える。"
+                        + "Accept-Language の読み方、properties の探索順、"
+                        + "日付・数値・通貨・タイムゾーンの書式まで。")
+                .tags("国際化", "i18n", "ロケール", "ResourceBundle", "properties", "JSTL",
+                        "fmt", "Accept-Language", "タイムゾーン", "文字コード")
+                .source(I18nServlet.class)
+                .source(SourceFile.of("/WEB-INF/classes/messages_ja.properties",
+                        "messages_ja.properties", "ini"))
+                .source(SourceFile.of("/WEB-INF/classes/messages_en.properties",
+                        "messages_en.properties", "ini"))
+                .source(SourceFile.of("/WEB-INF/classes/messages.properties",
+                        "messages.properties", "ini"))
+                .build());
+
+        // ------------------------------------------------------------------
         // ここから下は「これから作るサンプル」の登録例です。
         // 状態を PLANNED にしておくと、一覧にグレー表示され、リンクは張られません。
         // 実際に作るときは status(...) を外して JSP を用意してください。
@@ -282,11 +349,18 @@ final class SampleDefinitions {
                 .tags("セッション", "ログイン", "認証", "フィルタ")
                 .build());
 
-        samples.add(Sample.builder("error-handling", Category.ADVANCED)
-                .title("エラー処理とエラーページ")
-                .summary("例外が起きたときにどこで受け止め、何を画面に出すか。")
+        samples.add(Sample.builder("listener", Category.ADVANCED)
+                .title("リスナーで起動・終了・セッションを捕まえる")
+                .summary("アプリの起動時と停止時、セッションの作成と破棄に処理を差し込む。")
                 .status(SampleStatus.PLANNED)
-                .tags("エラー処理", "例外", "web.xml", "ログ")
+                .tags("リスナー", "ServletContextListener", "HttpSessionListener", "起動処理")
+                .build());
+
+        samples.add(Sample.builder("async", Category.ADVANCED)
+                .title("時間のかかる処理を非同期で動かす")
+                .summary("AsyncContext でスレッドを解放し、終わったら応答を返す。")
+                .status(SampleStatus.PLANNED)
+                .tags("非同期", "AsyncContext", "スレッド", "タイムアウト")
                 .build());
 
         return samples;
