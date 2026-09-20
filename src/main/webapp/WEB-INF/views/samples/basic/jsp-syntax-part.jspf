@@ -1,0 +1,27 @@
+<%--
+  【サンプル】JSP の記法 : 静的インクルード (<%@ include file="..." %>) で取り込まれる断片
+
+  このファイルは単体では動きません。
+  変数 total / items も、メソッド yen(...) も、取り込む側 (jsp-syntax-scripting.jsp) が
+  宣言しているものです。それでも動くのは、静的インクルードが
+  「翻訳する前にファイルの中身をその場に貼り付ける」しくみだからです。
+
+  拡張子を .jspf にしているのは「断片 (fragment)」だと分かるようにするためで、
+  決まりではありません (.jsp でも動きます)。
+
+  下の pageEncoding は省略できません。
+  web.xml の <page-encoding> は url-pattern (*.jsp) に一致したファイルにしか効かず、
+  取り込む側の pageEncoding も引き継がれないため、
+  書かないとこの断片だけ ISO-8859-1 として読まれて文字化けします。
+--%>
+<%@ page pageEncoding="UTF-8" %>
+<div class="alert alert-secondary mb-0">
+  <p class="mb-1">
+    <strong>ここから下は <code>jsp-syntax-part.jspf</code> に書いてある内容です。</strong>
+  </p>
+  <ul class="mb-0">
+    <li>取り込む側の変数がそのまま使えます : 合計 <%= yen(total) %></li>
+    <li>取り込む側で宣言したメソッドも呼べます : <code>yen(120)</code> → <%= yen(120) %></li>
+    <li>この 2 つが使えるのは、<strong>翻訳前に 1 つのファイルへ合体している</strong>からです</li>
+  </ul>
+</div>

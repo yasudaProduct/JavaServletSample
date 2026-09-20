@@ -51,6 +51,11 @@ URL と JSP の場所は ID とカテゴリから自動的に決まります。
 > **注意**: `<jsp:attribute>` や `<jsp:body>` の**直前**に JSP コメント（`<%-- --%>`）を書くとエラーになります。
 > コメントは要素の内側に書いてください。
 
+> **注意**: `<t:sample>` や `<t:panel>` の中に**スクリプトレット（`<% %>`）は書けません**。
+> タグファイルの本文は既定で `body-content="scriptless"` のため、書くと翻訳エラーになります。
+> どうしても動かしたいときは、別の JSP に分けて `<jsp:include page="..." />` で呼びます
+> （実例: `samples/basic/jsp-syntax.jsp`）。そもそも新しい画面は EL と JSTL で書けば必要ありません。
+
 ### 2. カタログに登録する
 
 `SampleDefinitions.define()` に追加します。
@@ -195,6 +200,7 @@ MemoDao.prepareTable();
 | `samples/list/ProductDao.java` | `COUNT(*)` と `LIMIT / OFFSET` でのページング、LIKE のエスケープ |
 | `samples/file/StoredFileDao.java` | `BLOB` への保存、一覧では中身を読まない書き方 |
 | `samples/form/MemberForm.java` | フォームの値を受け取って `ValidationErrors` を返す形 |
+| `samples/form/LeaveRequestForm.java` | 必須 / 文字種 / 桁数 / 日付 / 範囲 / 相関 / 選択肢 / マスタ突き合わせの並べ方 |
 
 ---
 
@@ -243,6 +249,19 @@ Json.write(response, Json.object()
 `<t:icon>` で使える名前: `house` `journal-code` `palette` `input-cursor-text` `table`
 `shield-lock` `file-earmark-arrow-up` `arrow-repeat` `gear` `search` `github`
 `chevron-right` `code-slash` `grid` `lightbulb` `check-circle` `list` `external`
+
+### 入力チェックの部品（`common/Validators.java`）
+
+| メソッド | 用途 |
+| --- | --- |
+| `isBlank` / `isPresent` | 必須チェック（全角スペースだけの入力も「未入力」） |
+| `isHalfWidthAlphanumeric` / `isHalfWidthDigits` / `isFullWidthKatakana` | 文字種チェック |
+| `length` / `isLengthAtMost` / `isLengthExactly` | 桁数チェック（人が数えた文字数） |
+| `toInt` | 数値への変換（全角数字・桁あふれは空を返す） |
+| `toDate` / `formatDate` | 日付への変換（`2026-02-30` のような実在しない日付は空を返す） |
+| `strip` / `normalizeNewlines` | 前後の空白落とし、改行コードを `\n` に揃える |
+
+判定の仕方は部品に、「社員コードは 5 桁」のような**業務の決めごとはフォームのクラスに**書きます。
 
 ### ソースコード表示タグ
 
