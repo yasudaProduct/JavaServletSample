@@ -194,6 +194,36 @@ MemoDao.prepareTable();
 | --- | --- |
 | `samples/list/ProductDao.java` | `COUNT(*)` と `LIMIT / OFFSET` でのページング、LIKE のエスケープ |
 | `samples/file/StoredFileDao.java` | `BLOB` への保存、一覧では中身を読まない書き方 |
+| `samples/form/MemberForm.java` | フォームの値を受け取って `ValidationErrors` を返す形 |
+
+---
+
+## パターン D: JSON を返すサンプル（非同期通信）
+
+画面用の Servlet と、JSON を返す API 用の Servlet を分けて作ります。
+URL はサンプルの URL にぶら下げると分かりやすくなります。
+
+```
+/samples/ajax/{ID}        画面      XxxServlet
+/samples/ajax/{ID}/api    JSON API  XxxApiServlet
+```
+
+JSON の組み立ては `common/Json.java` を使います。
+
+```java
+Json.write(response, Json.object()
+        .put("ok", true)
+        .put("count", items.size())
+        .put("items", array));
+```
+
+- `Content-Type: application/json` と文字コードは `Json.write` が設定します
+- 入力チェックに引っかかったときは `response.setStatus(400)` を付けて
+  `{"ok":false,"errors":{...}}` のように返すと、画面側で項目ごとに出せます
+- 画面側は `fetch` を使います（同梱の jQuery は slim 版なので `$.ajax` は使えません）
+- 受け取った文字列は `textContent` で入れます（`innerHTML` に入れると XSS になります）
+
+実例: `samples/ajax/AjaxBasicsApiServlet.java` / `AjaxFormApiServlet.java`
 
 ---
 
