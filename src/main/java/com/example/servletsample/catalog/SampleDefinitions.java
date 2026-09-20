@@ -10,6 +10,7 @@ import com.example.servletsample.common.ValidationErrors;
 import com.example.servletsample.common.Validators;
 import com.example.servletsample.samples.advanced.AccessCheckFilter;
 import com.example.servletsample.samples.advanced.AccessLogFilter;
+import com.example.servletsample.samples.advanced.Account;
 import com.example.servletsample.samples.advanced.ApplicationException;
 import com.example.servletsample.samples.advanced.ErrorHandlingApiServlet;
 import com.example.servletsample.samples.advanced.ErrorHandlingServlet;
@@ -19,6 +20,9 @@ import com.example.servletsample.samples.advanced.FilterTrace;
 import com.example.servletsample.samples.advanced.FilterTraceStore;
 import com.example.servletsample.samples.advanced.I18nServlet;
 import com.example.servletsample.samples.advanced.RequestIdFilter;
+import com.example.servletsample.samples.advanced.TransactionServlet;
+import com.example.servletsample.samples.advanced.TransferDao;
+import com.example.servletsample.samples.advanced.TransferOutcome;
 import com.example.servletsample.samples.ajax.AjaxBasicsApiServlet;
 import com.example.servletsample.samples.ajax.AjaxBasicsServlet;
 import com.example.servletsample.samples.ajax.AjaxFormApiServlet;
@@ -58,6 +62,11 @@ import com.example.servletsample.samples.form.MemberForm;
 import com.example.servletsample.samples.form.RealtimeValidationServlet;
 import com.example.servletsample.samples.form.SeminarForm;
 import com.example.servletsample.samples.form.ValidationRulesServlet;
+import com.example.servletsample.samples.list.CrudServlet;
+import com.example.servletsample.samples.list.Customer;
+import com.example.servletsample.samples.list.CustomerDao;
+import com.example.servletsample.samples.list.CustomerForm;
+import com.example.servletsample.samples.list.OptimisticLockServlet;
 import com.example.servletsample.samples.list.Page;
 import com.example.servletsample.samples.list.Product;
 import com.example.servletsample.samples.list.ProductDao;
@@ -256,6 +265,32 @@ final class SampleDefinitions {
                 .source(Database.class)
                 .build());
 
+        samples.add(Sample.builder("crud", Category.LIST)
+                .title("マスタメンテナンス（登録・編集・削除）")
+                .summary("業務システムで何十画面も作ることになる基本の形。一覧を起点に、"
+                        + "登録・編集・削除を行き来します。表示は GET・更新は POST、削除の確認、"
+                        + "一意性チェックの二段構え、PRG まで。")
+                .tags("CRUD", "マスタ", "登録", "更新", "削除", "PRG", "UNIQUE制約",
+                        "楽観ロック", "JDBC")
+                .source(CrudServlet.class)
+                .source(CustomerForm.class)
+                .source(CustomerDao.class)
+                .source(Customer.class)
+                .build());
+
+        samples.add(Sample.builder("optimistic-lock", Category.LIST)
+                .title("更新の競合（楽観ロック）")
+                .summary("2 人が同じ行を同時に編集すると、後から保存した人が相手の変更を黙って消します。"
+                        + "version 列でそれに気付き、何が違うのかを並べて見せて選ばせるところまで。"
+                        + "1 人でも競合を再現できます。")
+                .tags("楽観ロック", "悲観ロック", "更新の喪失", "version", "排他制御",
+                        "同時更新", "JDBC", "UPDATE")
+                .source(OptimisticLockServlet.class)
+                .source(CustomerDao.class)
+                .source(Customer.class)
+                .source(CustomerForm.class)
+                .build());
+
         // ------------------------------------------------------------------
         // ファイル
         // ------------------------------------------------------------------
@@ -425,6 +460,20 @@ final class SampleDefinitions {
                         "messages_en.properties", "ini"))
                 .source(SourceFile.of("/WEB-INF/classes/messages.properties",
                         "messages.properties", "ini"))
+                .build());
+
+        samples.add(Sample.builder("transaction", Category.ADVANCED)
+                .title("データベースのトランザクション（commit と rollback）")
+                .summary("口座間の振替を題材に、複数の更新を「全部やるか 1 つもやらないか」にまとめる。"
+                        + "トランザクションを使わずに途中で失敗させると、"
+                        + "出金だけが確定して残高の合計が合わなくなる様子まで確かめられます。")
+                .tags("トランザクション", "commit", "rollback", "setAutoCommit", "JDBC",
+                        "分離レベル", "排他制御", "コネクション")
+                .source(TransactionServlet.class)
+                .source(TransferDao.class)
+                .source(TransferOutcome.class)
+                .source(Account.class)
+                .source(Database.class)
                 .build());
 
         // ------------------------------------------------------------------
