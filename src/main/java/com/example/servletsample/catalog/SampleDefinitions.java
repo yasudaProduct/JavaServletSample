@@ -55,6 +55,18 @@ import com.example.servletsample.samples.list.Product;
 import com.example.servletsample.samples.list.ProductDao;
 import com.example.servletsample.samples.list.ProductListServlet;
 import com.example.servletsample.samples.list.ProductSearch;
+import com.example.servletsample.samples.session.AuthApiServlet;
+import com.example.servletsample.samples.session.AuthFilterServlet;
+import com.example.servletsample.samples.session.AuthenticationFilter;
+import com.example.servletsample.samples.session.AuthorizationFilter;
+import com.example.servletsample.samples.session.CsrfServlet;
+import com.example.servletsample.samples.session.CsrfToken;
+import com.example.servletsample.samples.session.LoginServlet;
+import com.example.servletsample.samples.session.LoginUser;
+import com.example.servletsample.samples.session.LogoutServlet;
+import com.example.servletsample.samples.session.PasswordHash;
+import com.example.servletsample.samples.session.ProtectedPageServlet;
+import com.example.servletsample.samples.session.UserAccounts;
 
 /**
  * ★ サンプルを追加する場所 ★
@@ -282,6 +294,50 @@ final class SampleDefinitions {
                 .build());
 
         // ------------------------------------------------------------------
+        // セッション・認証
+        // ------------------------------------------------------------------
+        samples.add(Sample.builder("login", Category.SESSION)
+                .title("ログインとログアウト")
+                .summary("セッションに「ログイン済み」の印を置き、次のリクエストで確かめる。"
+                        + "パスワードのハッシュ化、ログイン成功時のセッション ID の振り直し、"
+                        + "ログアウトを POST で受ける理由まで。")
+                .tags("セッション", "ログイン", "ログアウト", "認証", "パスワード", "ハッシュ",
+                        "PBKDF2", "セッション固定攻撃", "invalidate", "PRG")
+                .source(LoginServlet.class)
+                .source(LogoutServlet.class)
+                .source(PasswordHash.class)
+                .source(UserAccounts.class)
+                .source(LoginUser.class)
+                .build());
+
+        samples.add(Sample.builder("auth-filter", Category.SESSION)
+                .title("フィルタで未ログインを弾く（認証・認可）")
+                .summary("ログイン確認を画面ごとに書くと必ず漏れる。フィルタで URL ごとに一括で掛け、"
+                        + "認証は 401、権限不足は 403 と返し分けます。"
+                        + "Ajax にリダイレクトを返してはいけない理由も。")
+                .tags("フィルタ", "認証", "認可", "ロール", "401", "403", "セッション",
+                        "オープンリダイレクト", "Ajax", "web.xml")
+                .source(AuthenticationFilter.class)
+                .source(AuthorizationFilter.class)
+                .source(AuthFilterServlet.class)
+                .source(ProtectedPageServlet.class)
+                .source(AuthApiServlet.class)
+                .source(SourceFile.of("/WEB-INF/web.xml", "web.xml", "xml"))
+                .source(SourceFile.jsp("/WEB-INF/views/samples/session/auth-filter-protected.jsp"))
+                .build());
+
+        samples.add(Sample.builder("csrf", Category.SESSION)
+                .title("CSRF 対策（ワンタイムトークン）")
+                .summary("罠のページから送られた依頼を、ログイン済みの本人からの依頼と区別する。"
+                        + "トークンを付けた場合・付けない場合・でたらめな場合を送り比べ、"
+                        + "SameSite Cookie や二重送信防止との違いも整理します。")
+                .tags("CSRF", "セキュリティ", "トークン", "セッション", "403", "SameSite",
+                        "二重送信", "POST", "SecureRandom")
+                .source(CsrfServlet.class)
+                .source(CsrfToken.class)
+                .build());
+
+        // ------------------------------------------------------------------
         // 応用・その他
         // ------------------------------------------------------------------
         samples.add(Sample.builder("error-handling", Category.ADVANCED)
@@ -342,13 +398,6 @@ final class SampleDefinitions {
         // 状態を PLANNED にしておくと、一覧にグレー表示され、リンクは張られません。
         // 実際に作るときは status(...) を外して JSP を用意してください。
         // ------------------------------------------------------------------
-        samples.add(Sample.builder("login", Category.SESSION)
-                .title("ログインとログアウト")
-                .summary("セッションにログイン情報を持たせ、未ログインなら弾く。")
-                .status(SampleStatus.PLANNED)
-                .tags("セッション", "ログイン", "認証", "フィルタ")
-                .build());
-
         samples.add(Sample.builder("listener", Category.ADVANCED)
                 .title("リスナーで起動・終了・セッションを捕まえる")
                 .summary("アプリの起動時と停止時、セッションの作成と破棄に処理を差し込む。")
