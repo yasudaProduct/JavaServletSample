@@ -76,6 +76,11 @@
         判定は Servlet 側（または Bean のメソッド）に置きます。
       </li>
     </ul>
+    <p class="text-muted">
+      とはいえ、既存の画面を直すときには読めないと困ります。
+      スクリプトレットを含む記法そのもの（何がどこへ変換されるのか）は
+      <a href="${ctx}/samples/basic/jsp-syntax">JSP の記法</a>のサンプルで扱っています。
+    </p>
 
     <h2>taglib 宣言と JSTL の使い分け</h2>
     <p>

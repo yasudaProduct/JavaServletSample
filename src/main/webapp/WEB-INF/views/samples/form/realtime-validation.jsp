@@ -512,6 +512,10 @@ request.setAttribute("nameMaxLength", ContactForm.NAME_MAX_LENGTH);</code></pre>
         … サーバ側だけで確かめる形。チェックの順番、エラーメッセージの文面、境界値のテスト
       </li>
       <li>
+        <a href="${ctx}/samples/form/validation-rules">入力チェックの種類</a>
+        … 文字種・桁数・日付の実在・相関・選択肢・マスタ突き合わせの書き分け
+      </li>
+      <li>
         <a href="${ctx}/samples/ajax/ajax-form">非同期通信のサンプル（ajax-form）</a>
         … サーバに問い合わせないと分からないチェック（重複チェックなど）
       </li>

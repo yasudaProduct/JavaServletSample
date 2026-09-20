@@ -7,6 +7,7 @@ import com.example.servletsample.common.Database;
 import com.example.servletsample.common.Flash;
 import com.example.servletsample.common.Json;
 import com.example.servletsample.common.ValidationErrors;
+import com.example.servletsample.common.Validators;
 import com.example.servletsample.samples.ajax.AjaxBasicsApiServlet;
 import com.example.servletsample.samples.ajax.AjaxBasicsServlet;
 import com.example.servletsample.samples.ajax.AjaxFormApiServlet;
@@ -21,6 +22,7 @@ import com.example.servletsample.samples.basic.HelloWorldServlet;
 import com.example.servletsample.samples.basic.JspBasicsServlet;
 import com.example.servletsample.samples.basic.LifecycleCounterApiServlet;
 import com.example.servletsample.samples.basic.LifecycleServlet;
+import com.example.servletsample.samples.basic.OrderBean;
 import com.example.servletsample.samples.basic.RequestParameterServlet;
 import com.example.servletsample.samples.basic.ScopeServlet;
 import com.example.servletsample.samples.design.ModalDialogEntriesServlet;
@@ -30,9 +32,13 @@ import com.example.servletsample.samples.file.FileDownloadServlet;
 import com.example.servletsample.samples.file.FileUploadServlet;
 import com.example.servletsample.samples.file.StoredFile;
 import com.example.servletsample.samples.file.StoredFileDao;
+import com.example.servletsample.samples.form.EmployeeMaster;
 import com.example.servletsample.samples.form.InputValidationServlet;
+import com.example.servletsample.samples.form.LeaveRequestForm;
+import com.example.servletsample.samples.form.LeaveType;
 import com.example.servletsample.samples.form.MemberForm;
 import com.example.servletsample.samples.form.RealtimeValidationServlet;
+import com.example.servletsample.samples.form.ValidationRulesServlet;
 import com.example.servletsample.samples.list.Page;
 import com.example.servletsample.samples.list.Product;
 import com.example.servletsample.samples.list.ProductDao;
@@ -120,6 +126,20 @@ final class SampleDefinitions {
                 .source(JspBasicsServlet.class)
                 .build());
 
+        samples.add(Sample.builder("jsp-syntax", Category.BASIC)
+                .title("JSP の記法（ディレクティブ・スクリプトレット・アクション）")
+                .summary("ディレクティブ・宣言・スクリプトレット・式・アクションが、変換後の Servlet の"
+                        + "どこへ行くのかを動かしながら確かめる。インクルードの 2 種類、jsp:useBean、"
+                        + "コメントがブラウザまで届くかどうかまで。")
+                .tags("JSP", "スクリプトレット", "ディレクティブ", "jsp:include", "jsp:useBean",
+                        "暗黙オブジェクト", "JSPコメント", "翻訳", "JavaBeans")
+                .source(OrderBean.class)
+                .source(SourceFile.jsp("/WEB-INF/views/samples/basic/jsp-syntax-scripting.jsp"))
+                .source(SourceFile.jsp("/WEB-INF/views/samples/basic/jsp-syntax-part.jspf"))
+                .source(SourceFile.jsp("/WEB-INF/views/samples/basic/jsp-syntax-included.jsp"))
+                .source(SourceFile.jsp("/WEB-INF/views/samples/basic/jsp-syntax-comments.jsp"))
+                .build());
+
         // ------------------------------------------------------------------
         // 画面デザイン
         // ------------------------------------------------------------------
@@ -153,6 +173,20 @@ final class SampleDefinitions {
                 .tags("フォーム", "バリデーション", "POST", "エラー表示", "相関チェック", "PRG")
                 .source(InputValidationServlet.class)
                 .source(MemberForm.class)
+                .source(ValidationErrors.class)
+                .build());
+
+        samples.add(Sample.builder("validation-rules", Category.FORM)
+                .title("入力チェックの種類（必須・文字種・桁数・日付・相関）")
+                .summary("必須、文字種、桁数、日付の実在、範囲、相関、選択肢、マスタ突き合わせ。"
+                        + "休暇申請フォームを題材に、種類ごとの書き方と「どの順に並べるか」を確かめます。")
+                .tags("フォーム", "バリデーション", "入力チェック", "正規表現", "日付", "相関チェック",
+                        "ホワイトリスト", "複数選択", "POST")
+                .source(ValidationRulesServlet.class)
+                .source(LeaveRequestForm.class)
+                .source(Validators.class)
+                .source(LeaveType.class)
+                .source(EmployeeMaster.class)
                 .source(ValidationErrors.class)
                 .build());
 
