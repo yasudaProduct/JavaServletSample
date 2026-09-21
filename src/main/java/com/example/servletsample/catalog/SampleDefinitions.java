@@ -41,12 +41,14 @@ import com.example.servletsample.samples.ajax.AjaxPollingApiServlet;
 import com.example.servletsample.samples.ajax.AjaxPollingServlet;
 import com.example.servletsample.samples.ajax.AjaxSearchApiServlet;
 import com.example.servletsample.samples.ajax.AjaxSearchServlet;
+import com.example.servletsample.samples.basic.CharacterEncodingServlet;
 import com.example.servletsample.samples.basic.ForwardRedirectGoalServlet;
 import com.example.servletsample.samples.basic.ForwardRedirectServlet;
 import com.example.servletsample.samples.basic.HelloWorldServlet;
 import com.example.servletsample.samples.basic.JspBasicsServlet;
 import com.example.servletsample.samples.basic.LifecycleCounterApiServlet;
 import com.example.servletsample.samples.basic.LifecycleServlet;
+import com.example.servletsample.samples.basic.Mojibake;
 import com.example.servletsample.samples.basic.OrderBean;
 import com.example.servletsample.samples.basic.RequestParameterServlet;
 import com.example.servletsample.samples.basic.ScopeServlet;
@@ -206,9 +208,10 @@ final class SampleDefinitions {
                 .summary("日本語が「????」や「譁?ｭ怜喧」になるのはどこで起きるのか。"
                         + "リクエストの読み方・レスポンスの書き方・HTML の宣言を切り替えて、"
                         + "化ける瞬間と直し方を見比べます。")
-                .status(SampleStatus.PLANNED)
                 .tags("文字コード", "文字化け", "UTF-8", "setCharacterEncoding",
                         "request-character-encoding", "Content-Type", "POST", "GET")
+                .source(CharacterEncodingServlet.class)
+                .source(Mojibake.class)
                 .build());
 
         samples.add(Sample.builder("cookie", Category.BASIC)
