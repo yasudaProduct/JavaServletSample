@@ -56,6 +56,8 @@ import com.example.servletsample.samples.basic.OrderBean;
 import com.example.servletsample.samples.basic.RequestParameterServlet;
 import com.example.servletsample.samples.basic.RequestResponseApiServlet;
 import com.example.servletsample.samples.basic.RequestResponseServlet;
+import com.example.servletsample.samples.basic.ResponseOutputDemoServlet;
+import com.example.servletsample.samples.basic.ResponseOutputServlet;
 import com.example.servletsample.samples.basic.ScopeServlet;
 import com.example.servletsample.samples.basic.ServletConfigDemoServlet;
 import com.example.servletsample.samples.basic.ServletConfigServlet;
@@ -241,9 +243,10 @@ final class SampleDefinitions {
                 .summary("JSP を使わずに HTML・テキスト・JSON を書き出す。"
                         + "Content-Type で見え方が変わること、書き始めたあとに forward すると"
                         + "例外になること、バッファと flush の関係を確かめます。")
-                .status(SampleStatus.PLANNED)
                 .tags("getWriter", "Content-Type", "PrintWriter", "バッファ", "flushBuffer",
                         "IllegalStateException", "getOutputStream")
+                .source(ResponseOutputServlet.class)
+                .source(ResponseOutputDemoServlet.class)
                 .build());
 
         samples.add(Sample.builder("servlet-config", Category.BASIC)
