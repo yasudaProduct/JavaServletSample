@@ -3,6 +3,7 @@ package com.example.servletsample.catalog;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.servletsample.common.CatalogInitializer;
 import com.example.servletsample.common.Database;
 import com.example.servletsample.common.Flash;
 import com.example.servletsample.common.Json;
@@ -11,7 +12,12 @@ import com.example.servletsample.common.Validators;
 import com.example.servletsample.samples.advanced.AccessCheckFilter;
 import com.example.servletsample.samples.advanced.AccessLogFilter;
 import com.example.servletsample.samples.advanced.Account;
+import com.example.servletsample.samples.advanced.AppLifecycleListener;
 import com.example.servletsample.samples.advanced.ApplicationException;
+import com.example.servletsample.samples.advanced.AsyncApiServlet;
+import com.example.servletsample.samples.advanced.AsyncJobListener;
+import com.example.servletsample.samples.advanced.AsyncServlet;
+import com.example.servletsample.samples.advanced.AsyncWorkerPool;
 import com.example.servletsample.samples.advanced.ErrorHandlingApiServlet;
 import com.example.servletsample.samples.advanced.ErrorHandlingServlet;
 import com.example.servletsample.samples.advanced.FilterApiServlet;
@@ -19,7 +25,11 @@ import com.example.servletsample.samples.advanced.FilterServlet;
 import com.example.servletsample.samples.advanced.FilterTrace;
 import com.example.servletsample.samples.advanced.FilterTraceStore;
 import com.example.servletsample.samples.advanced.I18nServlet;
+import com.example.servletsample.samples.advanced.ListenerEvent;
+import com.example.servletsample.samples.advanced.ListenerEventLog;
+import com.example.servletsample.samples.advanced.ListenerServlet;
 import com.example.servletsample.samples.advanced.RequestIdFilter;
+import com.example.servletsample.samples.advanced.SessionLifecycleListener;
 import com.example.servletsample.samples.advanced.TransactionServlet;
 import com.example.servletsample.samples.advanced.TransferDao;
 import com.example.servletsample.samples.advanced.TransferOutcome;
@@ -476,24 +486,50 @@ final class SampleDefinitions {
                 .source(Database.class)
                 .build());
 
-        // ------------------------------------------------------------------
-        // ここから下は「これから作るサンプル」の登録例です。
-        // 状態を PLANNED にしておくと、一覧にグレー表示され、リンクは張られません。
-        // 実際に作るときは status(...) を外して JSP を用意してください。
-        // ------------------------------------------------------------------
         samples.add(Sample.builder("listener", Category.ADVANCED)
                 .title("リスナーで起動・終了・セッションを捕まえる")
-                .summary("アプリの起動時と停止時、セッションの作成と破棄に処理を差し込む。")
-                .status(SampleStatus.PLANNED)
-                .tags("リスナー", "ServletContextListener", "HttpSessionListener", "起動処理")
+                .summary("アプリの起動時と停止時、セッションの作成と破棄に処理を差し込む。"
+                        + "呼ぶのはコンテナで、こちらは実装して登録するだけ。"
+                        + "セッションに値を入れる・消す・破棄すると、どのメソッドが"
+                        + "どの順に呼ばれるかをその場で確かめられます。")
+                .tags("リスナー", "Listener", "ServletContextListener", "HttpSessionListener",
+                        "HttpSessionAttributeListener", "WebListener", "起動処理", "後始末",
+                        "セッション", "メモリリーク")
+                .source(ListenerServlet.class)
+                .source(AppLifecycleListener.class)
+                .source(SessionLifecycleListener.class)
+                .source(ListenerEvent.class)
+                .source(ListenerEventLog.class)
+                .source(CatalogInitializer.class)
                 .build());
 
         samples.add(Sample.builder("async", Category.ADVANCED)
                 .title("時間のかかる処理を非同期で動かす")
-                .summary("AsyncContext でスレッドを解放し、終わったら応答を返す。")
-                .status(SampleStatus.PLANNED)
-                .tags("非同期", "AsyncContext", "スレッド", "タイムアウト")
+                .summary("AsyncContext でコンテナのスレッドを先に返し、"
+                        + "終わってから別のスレッドで応答する。同期と非同期を並べて実行し、"
+                        + "どのスレッドが待っていたか、時間切れをどう返すか、"
+                        + "同時に投げると順番待ちがどこに現れるかまで。")
+                .tags("非同期", "AsyncContext", "AsyncListener", "asyncSupported", "スレッド",
+                        "スレッドプール", "タイムアウト", "complete", "dispatch", "503")
+                .source(AsyncServlet.class)
+                .source(AsyncApiServlet.class)
+                .source(AsyncJobListener.class)
+                .source(AsyncWorkerPool.class)
+                .source(Json.class)
                 .build());
+
+        // ------------------------------------------------------------------
+        // 「これから作るサンプル」を先に登録しておくこともできます。
+        // status(SampleStatus.PLANNED) を付けると、一覧にグレー表示され、
+        // リンクは張られません (JSP はまだ無くて構いません)。
+        //
+        // samples.add(Sample.builder("pdf-download", Category.FILE)
+        //         .title("PDF を出力する")
+        //         .summary("帳票を PDF で作ってダウンロードさせる。")
+        //         .status(SampleStatus.PLANNED)
+        //         .tags("PDF", "帳票", "ダウンロード")
+        //         .build());
+        // ------------------------------------------------------------------
 
         return samples;
     }
