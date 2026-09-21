@@ -42,6 +42,7 @@ import com.example.servletsample.samples.ajax.AjaxPollingServlet;
 import com.example.servletsample.samples.ajax.AjaxSearchApiServlet;
 import com.example.servletsample.samples.ajax.AjaxSearchServlet;
 import com.example.servletsample.samples.basic.CharacterEncodingServlet;
+import com.example.servletsample.samples.basic.ContextPathServlet;
 import com.example.servletsample.samples.basic.CookieServlet;
 import com.example.servletsample.samples.basic.Cookies;
 import com.example.servletsample.samples.basic.ForwardRedirectGoalServlet;
@@ -281,8 +282,8 @@ final class SampleDefinitions {
                 .summary("画像や CSS へのリンクが配備先で切れるのはなぜか。"
                         + "「/ 始まり」「相対」「${pageContext.request.contextPath} 付き」の 3 通りを並べ、"
                         + "forward したあとにどこを指すかまで見比べます。")
-                .status(SampleStatus.PLANNED)
                 .tags("contextPath", "相対パス", "リンク", "404", "pageContext", "sendRedirect", "配備")
+                .source(ContextPathServlet.class)
                 .build());
 
         // ------------------------------------------------------------------
