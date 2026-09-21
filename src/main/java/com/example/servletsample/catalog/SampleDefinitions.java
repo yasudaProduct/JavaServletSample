@@ -51,6 +51,8 @@ import com.example.servletsample.samples.basic.LifecycleServlet;
 import com.example.servletsample.samples.basic.Mojibake;
 import com.example.servletsample.samples.basic.OrderBean;
 import com.example.servletsample.samples.basic.RequestParameterServlet;
+import com.example.servletsample.samples.basic.RequestResponseApiServlet;
+import com.example.servletsample.samples.basic.RequestResponseServlet;
 import com.example.servletsample.samples.basic.ScopeServlet;
 import com.example.servletsample.samples.basic.UrlMappingDemoServlet;
 import com.example.servletsample.samples.basic.UrlMappingRules;
@@ -198,9 +200,12 @@ final class SampleDefinitions {
                 .summary("Servlet は HTTP を Java のオブジェクトにしたもの。"
                         + "メソッド・URL・ヘッダを一覧で確かめ、ステータスコードやヘッダを"
                         + "自分で決めて返してみます。")
-                .status(SampleStatus.PLANNED)
                 .tags("HTTP", "リクエストヘッダ", "レスポンスヘッダ", "ステータスコード",
                         "setStatus", "sendError", "Content-Type")
+                .source(RequestResponseServlet.class)
+                .source(RequestResponseApiServlet.class)
+                .source(Json.class)
+                .source(Validators.class)
                 .build());
 
         samples.add(Sample.builder("character-encoding", Category.BASIC)
