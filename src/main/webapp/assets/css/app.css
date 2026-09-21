@@ -36,6 +36,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* 端末を横にしたときに iOS が勝手に文字を大きくするのを止める */
+  -webkit-text-size-adjust: 100%;
 }
 
 a {
@@ -53,6 +55,11 @@ code {
   background-color: #f6f7f9;
   padding: .1em .35em;
   border-radius: 4px;
+  /*
+    HttpServletRequest#getRequestDispatcher のような長い名前でも画面からはみ出さない。
+    (word-break: break-word は表の列幅まで 1 文字ぶんに縮めてしまうので使いません)
+  */
+  overflow-wrap: break-word;
 }
 
 .site-icon {
@@ -581,6 +588,33 @@ a.badge-category:hover {
   margin-bottom: .5rem;
 }
 
+/* ------------------------------------------------- 横に長い表 (table-responsive) */
+/*
+  Bootstrap の .table-responsive は「はみ出したら横スクロール」するだけなので、
+  スマートフォンでは続きがあることに気づけません。
+  app.js が「実際にはみ出している枠」にだけ is-scrollable を付けるので、
+  そのときだけ右端に影を出して、横に動かせることを伝えます。
+*/
+.table-responsive {
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive.is-scrollable {
+  box-shadow: inset -14px 0 10px -12px rgba(16, 24, 40, .25);
+}
+
+.table-responsive.is-scroll-end {
+  box-shadow: none;
+}
+
+/* 続きがあることを文字でも伝える (狭い画面だけ) */
+.table-scroll-hint {
+  display: none;
+  font-size: .75rem;
+  color: var(--site-muted);
+  margin: .375rem 0 0;
+}
+
 /* ---------------------------------------------------------------- ソースコード表示 */
 .code-block {
   border: 1px solid var(--site-border);
@@ -671,6 +705,7 @@ a.badge-category:hover {
   margin: 0;
   padding: 1rem;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* highlight.js のスタイルが二重に余白を付けないようにする */
@@ -970,7 +1005,15 @@ pre.code-snippet code {
   color: #fff;
 }
 
-/* ---------------------------------------------------------------- 画面が狭いとき */
+/* ================================================================
+   画面が狭いとき
+
+   サンプルのデモと解説はスマートフォンからも読まれます。
+   おおまかに次の 3 段階で調整しています。
+     - 991.98px 以下 … タブレット。サイドバーが消える幅
+     - 767.98px 以下 … 大きめのスマートフォン。Bootstrap の md が外れる幅
+     - 575.98px 以下 … スマートフォン。余白と文字を小さくする
+   ================================================================ */
 @media (max-width: 991.98px) {
   .site-header__search {
     margin-top: .75rem;
@@ -996,5 +1039,178 @@ pre.code-snippet code {
 
   .sample-pager__side--right {
     text-align: left;
+  }
+
+  /*
+    サイドバーが無くなる幅では、「デモ / ソースコード / 解説」のタブを
+    画面の上に貼り付けておきます。長いデモを見たあとでも、
+    いちばん上まで戻らずに解説へ移れます。
+  */
+  .sample-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background-color: var(--site-bg);
+    padding-top: .25rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  /*
+    iOS は文字が 16px 未満の入力欄にふれると画面を自動で拡大します。
+    拡大されたままになって操作しづらいので、狭い画面では 16px に戻します。
+  */
+  .form-control,
+  .form-control-sm,
+  .custom-select,
+  .custom-select-sm,
+  .custom-file-label {
+    font-size: 16px;
+  }
+
+  .site-main {
+    padding-top: 1.25rem;
+  }
+
+  .page-header__title {
+    font-size: 1.375rem;
+  }
+
+  .page-header__lead {
+    font-size: .9375rem;
+    line-height: 1.75;
+  }
+
+  /*
+    幅を詰めすぎると、表の中身が「メッ / セー / ジ」のように
+    1 文字ずつ縦に並んでしまって読めません。
+    どの列にも最低限の幅を持たせ、はみ出した分は枠の中の横スクロールで見せます。
+  */
+  .table-responsive > .table th,
+  .table-responsive > .table td {
+    min-width: 4.5rem;
+  }
+
+  /* デモの一覧や結果の表は、列の見出しだけは折り返さずに読ませる */
+  .demo-area .table-responsive > .table thead th,
+  .demo-panel__body .table-responsive > .table thead th {
+    white-space: nowrap;
+  }
+
+  /*
+    「項目 : 値」の形の表は、項目名の列が 25% だと細すぎて縦に伸びるため、
+    狭い画面では少し幅を渡します (Bootstrap の .w-25 を上書きするため !important)。
+  */
+  .table tbody th.w-25 {
+    width: 38% !important;
+  }
+
+  /*
+    解説やエラーページの「項目 : 説明」の表は、説明文が入るので
+    横スクロールより折り返した方が読めます。
+    (広い画面用に付けている幅の固定と nowrap をここで解除します)
+  */
+  .doc-table th,
+  .error-detail-table th {
+    width: auto;
+    white-space: normal;
+  }
+
+  .table-scroll-hint {
+    display: block;
+  }
+}
+
+@media (max-width: 575.98px) {
+  /* 枠の内側の余白を詰めて、デモと解説そのものに幅を使う */
+  .demo-panel__head {
+    flex-wrap: wrap;
+    gap: .125rem .625rem;
+    padding: .5rem .75rem;
+  }
+
+  .demo-panel__body {
+    padding: .875rem;
+  }
+
+  .sample-note,
+  .doc-body {
+    padding: 1rem;
+  }
+
+  .sample-note pre,
+  pre.code-snippet,
+  .doc-tree {
+    padding: .75rem;
+  }
+
+  /* タブは 3 つで画面いっぱいに。指で押しやすい大きさにする */
+  .sample-tabs {
+    flex-wrap: nowrap;
+  }
+
+  .sample-tabs .nav-item {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .sample-tabs .nav-link {
+    padding: .5rem .25rem;
+    font-size: .875rem;
+    white-space: nowrap;
+  }
+
+  .sample-panes {
+    padding-top: 1rem;
+  }
+
+  /* ソースコードの見出しは 2 段にして、パスを丸ごと読めるようにする */
+  .code-block__head {
+    flex-wrap: wrap;
+    gap: .125rem .5rem;
+    padding: .5rem .625rem;
+  }
+
+  .code-block__name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+
+  /* パスは 1 行に収まらないので、省略せずに折り返して全部見せる */
+  .code-block__path {
+    flex: 1 1 100%;
+    order: 3;
+    font-size: .6875rem;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: break-word;
+  }
+
+  .code-block__gutter {
+    padding: .875rem .5rem;
+  }
+
+  .code-block__code {
+    padding: .875rem .75rem;
+  }
+
+  .code-block__gutter,
+  .code-block__code,
+  .code-block__code code {
+    font-size: .75rem;
+  }
+
+  .sample-pager {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+  }
+
+  .error-page,
+  .empty-state {
+    padding-left: .5rem;
+    padding-right: .5rem;
   }
 }
