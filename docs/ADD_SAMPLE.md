@@ -319,6 +319,7 @@ src/main/resources/messages_ja.properties  →  /WEB-INF/classes/messages_ja.pro
 `<t:icon>` で使える名前: `house` `journal-code` `palette` `input-cursor-text` `table`
 `shield-lock` `file-earmark-arrow-up` `arrow-repeat` `gear` `search` `github`
 `chevron-right` `code-slash` `grid` `lightbulb` `check-circle` `list` `external`
+`universal-access`
 
 ### 入力チェックの部品（`common/Validators.java`）
 

@@ -33,6 +33,13 @@
 </head>
 <body>
 
+<%--
+  キーボード操作の人が、ヘッダーのリンクを全部たどらずに本文へ飛べるようにするリンク。
+  普段は sr-only で見えず、Tab でフォーカスが当たったときだけ現れます。
+  解説: /samples/a11y/keyboard-operation
+--%>
+<a class="sr-only sr-only-focusable skip-link" href="#main-content">本文へスキップ</a>
+
 <%-- ============================ ヘッダー ============================ --%>
 <header class="site-header">
   <nav class="navbar navbar-expand-lg navbar-dark">
@@ -133,7 +140,7 @@
       </aside>
 
       <%-- メイン --%>
-      <main class="col-lg-9 col-xl-10 site-main">
+      <main class="col-lg-9 col-xl-10 site-main" id="main-content" tabindex="-1">
         <c:if test="${not empty breadcrumb}">
           <nav aria-label="パンくずリスト">
             <ol class="breadcrumb site-breadcrumb">

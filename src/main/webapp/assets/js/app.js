@@ -165,7 +165,39 @@
         area.classList.remove('is-scroll-end');
       }
       toggleScrollHint(area, scrollable);
+      toggleScrollFocus(area, scrollable);
     });
+  }
+
+  /**
+   * はみ出している表を、キーボードでも横にスクロールできるようにする。
+   *
+   * マウスやタッチが無いと、横スクロールする枠は動かせません。
+   * tabindex="0" を付けると Tab で枠に入れるようになり、矢印キーでスクロールできます。
+   * ただし Tab で止まる場所が増えるので、実際にはみ出しているときだけ付けます。
+   *
+   * 枠に入ったとき何の表なのかが分かるよう、role="region" と
+   * aria-label (表の caption) もあわせて付けます。
+   * 解説: /samples/a11y/accessible-table
+   */
+  function toggleScrollFocus(area, scrollable) {
+    if (!scrollable) {
+      area.removeAttribute('tabindex');
+      area.removeAttribute('role');
+      area.removeAttribute('aria-label');
+      return;
+    }
+    if (area.getAttribute('tabindex') === '0') {
+      return;
+    }
+    var caption = area.querySelector('table > caption');
+    var title = caption ? caption.textContent.trim() : '';
+
+    area.setAttribute('tabindex', '0');
+    area.setAttribute('role', 'region');
+    area.setAttribute('aria-label', title
+      ? title + '（横にスクロールできます）'
+      : '横にスクロールできる表');
   }
 
   /** 表のすぐ下に出す「横にスクロールできます」の案内を出し入れする。 */
