@@ -908,6 +908,30 @@ pre.code-snippet code {
   word-break: break-all;
 }
 
+.error-page__icon {
+  color: var(--site-accent);
+  margin-bottom: .75rem;
+}
+
+.error-page__note {
+  font-size: .8125rem;
+  color: var(--site-muted);
+  margin-top: 1.25rem;
+  margin-bottom: 0;
+}
+
+/* エラーページで javax.servlet.error.* を並べる表 */
+.error-detail-table th {
+  width: 12rem;
+  font-weight: 600;
+  color: var(--site-muted);
+  white-space: nowrap;
+}
+
+.error-detail-table td {
+  word-break: break-word;
+}
+
 /* ---------------------------------------------------------------- フッター */
 .site-footer {
   flex-shrink: 0;

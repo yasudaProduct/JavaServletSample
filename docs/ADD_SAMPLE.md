@@ -233,6 +233,75 @@ Json.write(response, Json.object()
 
 ---
 
+## パターン E: web.xml への登録が要るサンプル
+
+フィルタやエラーページは、クラスを書くだけでは動きません。
+`src/main/webapp/WEB-INF/web.xml` への登録が要ります。
+
+### フィルタ
+
+```xml
+<filter>
+  <filter-name>accessLogFilter</filter-name>
+  <filter-class>com.example.servletsample.samples.advanced.AccessLogFilter</filter-class>
+  <init-param>
+    <param-name>slowMillis</param-name>
+    <param-value>1000</param-value>
+  </init-param>
+</filter>
+
+<filter-mapping>
+  <filter-name>accessLogFilter</filter-name>
+  <url-pattern>/samples/advanced/filter</url-pattern>
+  <url-pattern>/samples/advanced/filter/*</url-pattern>
+</filter-mapping>
+```
+
+- 適用される順番は **`<filter-mapping>` を書いた順**です（`@WebFilter` では順番を指定できません）
+- `<dispatcher>` を書かなければ `REQUEST` だけが対象です（`forward` では動きません）
+- **サンプル用のフィルタは URL を絞ってください。** `/*` に掛けるとサイト全体が影響を受けます
+
+### エラーページ
+
+```xml
+<error-page>
+  <error-code>404</error-code>
+  <location>/WEB-INF/views/error/404.jsp</location>
+</error-page>
+<error-page>
+  <exception-type>java.lang.Throwable</exception-type>
+  <location>/WEB-INF/views/error/500.jsp</location>
+</error-page>
+```
+
+既にサイト共通のエラーページを `WEB-INF/views/error/` に用意してあります
+（`404.jsp` / `500.jsp` / `error.jsp` / `application-error.jsp`）。
+実例は `samples/advanced/ErrorHandlingServlet.java` です。
+
+---
+
+## パターン F: メッセージを properties に置くサンプル
+
+`src/main/resources/` に置いたファイルは、ビルドすると `WEB-INF/classes/` へコピーされます。
+
+```
+src/main/resources/messages_ja.properties  →  /WEB-INF/classes/messages_ja.properties
+```
+
+ソースコードとして画面に出すときは、**ビルド後のパス**を指定します
+（画面に表示されるパスは `src/main/resources/...` に読み替えられます）。
+
+```java
+.source(SourceFile.of("/WEB-INF/classes/messages_ja.properties",
+        "messages_ja.properties", "ini"))
+```
+
+- `.properties` は **UTF-8** で保存します（Java 9 以降、UTF-8 として読まれます）
+- **Docker の開発環境ではホットリロードされません。**
+  `WEB-INF/classes` はマウントしていないため、`docker compose up -d --build` で反映します
+
+---
+
 ## 使える部品
 
 ### レイアウト用タグ（`/WEB-INF/tags`）
@@ -245,6 +314,7 @@ Json.write(response, Json.object()
 | `<t:sampleCard sample="${s}">` | 一覧用のカード |
 | `<t:resultModal message="${flash}">` | 処理完了を知らせるモーダル（値が空なら何も出ません） |
 | `<t:icon name="house" size="16">` | アイコン（Bootstrap Icons をインラインで保持） |
+| `<t:errorDetail />` | エラーページで `javax.servlet.error.*` を表にする |
 
 `<t:icon>` で使える名前: `house` `journal-code` `palette` `input-cursor-text` `table`
 `shield-lock` `file-earmark-arrow-up` `arrow-repeat` `gear` `search` `github`

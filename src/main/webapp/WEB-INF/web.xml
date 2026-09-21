@@ -63,16 +63,141 @@
   </session-config>
 
   <!-- ===================================================================
-       エラーページ
+       フィルタ (サンプル : 応用・その他 > フィルタで共通処理をはさむ)
+
+       フィルタは @WebFilter アノテーションでも登録できますが、
+       複数あるときの「適用される順番」を指定できません。
+       順番が意味を持つ場合は、このように web.xml へ書きます。
+
+       適用順は <filter-mapping> を書いた順です (<filter> の順ではありません)。
+         1. requestIdFilter   … リクエスト ID を採番する
+         2. accessLogFilter   … 処理時間を測ってログに出す
+         3. accessCheckFilter … 通してよいか判断する (駄目ならここで折り返す)
+
+       このサンプルでは分かりやすさのため /samples/advanced/filter 配下だけに掛けています。
+       サイト全体に掛けるなら <url-pattern>/*</url-pattern> です。
        =================================================================== -->
+  <filter>
+    <filter-name>requestIdFilter</filter-name>
+    <filter-class>com.example.servletsample.samples.advanced.RequestIdFilter</filter-class>
+  </filter>
+  <filter>
+    <filter-name>accessLogFilter</filter-name>
+    <filter-class>com.example.servletsample.samples.advanced.AccessLogFilter</filter-class>
+    <!-- init-param は起動時に 1 回だけ読まれます (init メソッドで受け取る) -->
+    <init-param>
+      <param-name>slowMillis</param-name>
+      <param-value>1000</param-value>
+    </init-param>
+  </filter>
+  <filter>
+    <filter-name>accessCheckFilter</filter-name>
+    <filter-class>com.example.servletsample.samples.advanced.AccessCheckFilter</filter-class>
+  </filter>
+
+  <!-- ===================================================================
+       フィルタ (サンプル : セッション・認証 > フィルタで未ログインを弾く)
+
+       認証 (誰か) と認可 (許してよいか) は別ものなので、フィルタも分けています。
+       順番が意味を持つところです。逆にすると「ログインしていない人に 403」となり、
+       ログインすれば通るのかどうかが利用者に伝わりません。
+         1. authenticationFilter … ログインしていなければ 401 / ログイン画面へ
+         2. authorizationFilter  … 管理者でなければ 403
+
+       url-pattern は保護したい URL を 1 つずつ書いています。
+       /samples/session/auth-filter/* と書くと、末尾の /* が無い
+       /samples/session/auth-filter (説明ページ) 自身にも掛かってしまうためです。
+       =================================================================== -->
+  <filter>
+    <filter-name>authenticationFilter</filter-name>
+    <filter-class>com.example.servletsample.samples.session.AuthenticationFilter</filter-class>
+  </filter>
+  <filter>
+    <filter-name>authorizationFilter</filter-name>
+    <filter-class>com.example.servletsample.samples.session.AuthorizationFilter</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>authenticationFilter</filter-name>
+    <url-pattern>/samples/session/auth-filter/member</url-pattern>
+    <url-pattern>/samples/session/auth-filter/admin</url-pattern>
+    <url-pattern>/samples/session/auth-filter/api</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>authorizationFilter</filter-name>
+    <url-pattern>/samples/session/auth-filter/admin</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>requestIdFilter</filter-name>
+    <url-pattern>/samples/advanced/filter</url-pattern>
+    <url-pattern>/samples/advanced/filter/*</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>accessLogFilter</filter-name>
+    <url-pattern>/samples/advanced/filter</url-pattern>
+    <url-pattern>/samples/advanced/filter/*</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>accessCheckFilter</filter-name>
+    <url-pattern>/samples/advanced/filter</url-pattern>
+    <url-pattern>/samples/advanced/filter/*</url-pattern>
+    <!--
+      <dispatcher> を書かないと REQUEST だけ (ブラウザから直接届いたとき) が対象です。
+      Servlet から JSP への forward では動きません。
+    -->
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <!-- ===================================================================
+       エラーページ
+
+       受け止められなかった例外と response.sendError(...) は、
+       コンテナがここの設定を見て、対応する JSP へ「転送」します。
+       (リダイレクトではないので、ブラウザの URL は元のままです)
+
+       選ばれ方は次のとおりです。
+         1. 例外が起きた場合 … <exception-type> のうち、継承関係でもっとも近いもの
+         2. 1 が無い場合     … <error-code> がステータスコードに一致するもの
+         3. どちらも無い場合 … コンテナ既定のエラー画面 (スタックトレースが出ることがある)
+
+       エラーページの JSP も /WEB-INF/ の下に置いています。
+       ブラウザから直接開かれると、エラーでもないのにエラー画面が出てしまうためです。
+
+       解説は「応用・その他 > エラー処理とエラーページ」のサンプルにあります。
+       =================================================================== -->
+  <error-page>
+    <error-code>400</error-code>
+    <location>/WEB-INF/views/error/error.jsp</location>
+  </error-page>
+  <error-page>
+    <error-code>403</error-code>
+    <location>/WEB-INF/views/error/error.jsp</location>
+  </error-page>
   <error-page>
     <error-code>404</error-code>
     <location>/WEB-INF/views/error/404.jsp</location>
   </error-page>
   <error-page>
+    <error-code>405</error-code>
+    <location>/WEB-INF/views/error/error.jsp</location>
+  </error-page>
+  <error-page>
     <error-code>500</error-code>
     <location>/WEB-INF/views/error/500.jsp</location>
   </error-page>
+
+  <!--
+    業務例外 (在庫不足・締め切り超過など) だけは専用の画面に割り当てます。
+    ApplicationException は RuntimeException を継承していますが、
+    コンテナは「もっとも近い型」を選ぶため、下の Throwable より優先されます。
+  -->
+  <error-page>
+    <exception-type>com.example.servletsample.samples.advanced.ApplicationException</exception-type>
+    <location>/WEB-INF/views/error/application-error.jsp</location>
+  </error-page>
+
+  <!-- 上のどれにも当てはまらない例外はすべてここへ (最後の受け皿) -->
   <error-page>
     <exception-type>java.lang.Throwable</exception-type>
     <location>/WEB-INF/views/error/500.jsp</location>

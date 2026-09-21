@@ -15,7 +15,7 @@ public enum Category {
     BASIC("basic", "基本", "Servlet と JSP の基本的な流れ", "journal-code"),
     DESIGN("design", "画面デザイン", "Bootstrap 4 を使った画面の組み立て", "palette"),
     FORM("form", "フォーム・入力", "入力・検証・確認画面といった入力まわり", "input-cursor-text"),
-    LIST("list", "一覧・検索", "一覧表示、検索、ページング、ソート", "table"),
+    LIST("list", "一覧・検索", "一覧・検索・ページング、マスタの登録・更新・削除", "table"),
     SESSION("session", "セッション・認証", "ログイン、スコープ、権限チェック", "shield-lock"),
     FILE("file", "ファイル", "アップロード、ダウンロード、CSV / PDF 出力", "file-earmark-arrow-up"),
     AJAX("ajax", "非同期通信", "Ajax、JSON API との連携", "arrow-repeat"),

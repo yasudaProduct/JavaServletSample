@@ -8,6 +8,21 @@ import com.example.servletsample.common.Flash;
 import com.example.servletsample.common.Json;
 import com.example.servletsample.common.ValidationErrors;
 import com.example.servletsample.common.Validators;
+import com.example.servletsample.samples.advanced.AccessCheckFilter;
+import com.example.servletsample.samples.advanced.AccessLogFilter;
+import com.example.servletsample.samples.advanced.Account;
+import com.example.servletsample.samples.advanced.ApplicationException;
+import com.example.servletsample.samples.advanced.ErrorHandlingApiServlet;
+import com.example.servletsample.samples.advanced.ErrorHandlingServlet;
+import com.example.servletsample.samples.advanced.FilterApiServlet;
+import com.example.servletsample.samples.advanced.FilterServlet;
+import com.example.servletsample.samples.advanced.FilterTrace;
+import com.example.servletsample.samples.advanced.FilterTraceStore;
+import com.example.servletsample.samples.advanced.I18nServlet;
+import com.example.servletsample.samples.advanced.RequestIdFilter;
+import com.example.servletsample.samples.advanced.TransactionServlet;
+import com.example.servletsample.samples.advanced.TransferDao;
+import com.example.servletsample.samples.advanced.TransferOutcome;
 import com.example.servletsample.samples.ajax.AjaxBasicsApiServlet;
 import com.example.servletsample.samples.ajax.AjaxBasicsServlet;
 import com.example.servletsample.samples.ajax.AjaxFormApiServlet;
@@ -28,22 +43,47 @@ import com.example.servletsample.samples.basic.ScopeServlet;
 import com.example.servletsample.samples.design.ModalDialogEntriesServlet;
 import com.example.servletsample.samples.design.ModalDialogServlet;
 import com.example.servletsample.samples.design.ReceptionEntry;
+import com.example.servletsample.samples.file.Csv;
+import com.example.servletsample.samples.file.CsvDownloadServlet;
+import com.example.servletsample.samples.file.CsvExportServlet;
+import com.example.servletsample.samples.file.CsvOptions;
 import com.example.servletsample.samples.file.FileDownloadServlet;
 import com.example.servletsample.samples.file.FileUploadServlet;
+import com.example.servletsample.samples.file.SalesRecord;
+import com.example.servletsample.samples.file.SalesRecords;
 import com.example.servletsample.samples.file.StoredFile;
 import com.example.servletsample.samples.file.StoredFileDao;
+import com.example.servletsample.samples.form.ConfirmFormServlet;
 import com.example.servletsample.samples.form.EmployeeMaster;
 import com.example.servletsample.samples.form.InputValidationServlet;
 import com.example.servletsample.samples.form.LeaveRequestForm;
 import com.example.servletsample.samples.form.LeaveType;
 import com.example.servletsample.samples.form.MemberForm;
 import com.example.servletsample.samples.form.RealtimeValidationServlet;
+import com.example.servletsample.samples.form.SeminarForm;
 import com.example.servletsample.samples.form.ValidationRulesServlet;
+import com.example.servletsample.samples.list.CrudServlet;
+import com.example.servletsample.samples.list.Customer;
+import com.example.servletsample.samples.list.CustomerDao;
+import com.example.servletsample.samples.list.CustomerForm;
+import com.example.servletsample.samples.list.OptimisticLockServlet;
 import com.example.servletsample.samples.list.Page;
 import com.example.servletsample.samples.list.Product;
 import com.example.servletsample.samples.list.ProductDao;
 import com.example.servletsample.samples.list.ProductListServlet;
 import com.example.servletsample.samples.list.ProductSearch;
+import com.example.servletsample.samples.session.AuthApiServlet;
+import com.example.servletsample.samples.session.AuthFilterServlet;
+import com.example.servletsample.samples.session.AuthenticationFilter;
+import com.example.servletsample.samples.session.AuthorizationFilter;
+import com.example.servletsample.samples.session.CsrfServlet;
+import com.example.servletsample.samples.session.CsrfToken;
+import com.example.servletsample.samples.session.LoginServlet;
+import com.example.servletsample.samples.session.LoginUser;
+import com.example.servletsample.samples.session.LogoutServlet;
+import com.example.servletsample.samples.session.PasswordHash;
+import com.example.servletsample.samples.session.ProtectedPageServlet;
+import com.example.servletsample.samples.session.UserAccounts;
 
 /**
  * ★ サンプルを追加する場所 ★
@@ -199,6 +239,17 @@ final class SampleDefinitions {
                 .source(ValidationErrors.class)
                 .build());
 
+        samples.add(Sample.builder("confirm-form", Category.FORM)
+                .title("入力 → 確認 → 完了（3 画面）")
+                .summary("業務システムで定番の流れ。値の持ち回りを隠し項目とセッションの 2 通りで試し、"
+                        + "確定時に検証をやり直す理由、二重送信をワンタイムトークンで防ぐ方法まで。")
+                .tags("フォーム", "確認画面", "PRG", "二重送信", "ワンタイムトークン", "hidden",
+                        "セッション", "POST", "XSS")
+                .source(ConfirmFormServlet.class)
+                .source(SeminarForm.class)
+                .source(Flash.class)
+                .build());
+
         // ------------------------------------------------------------------
         // 一覧・検索
         // ------------------------------------------------------------------
@@ -214,6 +265,32 @@ final class SampleDefinitions {
                 .source(Database.class)
                 .build());
 
+        samples.add(Sample.builder("crud", Category.LIST)
+                .title("マスタメンテナンス（登録・編集・削除）")
+                .summary("業務システムで何十画面も作ることになる基本の形。一覧を起点に、"
+                        + "登録・編集・削除を行き来します。表示は GET・更新は POST、削除の確認、"
+                        + "一意性チェックの二段構え、PRG まで。")
+                .tags("CRUD", "マスタ", "登録", "更新", "削除", "PRG", "UNIQUE制約",
+                        "楽観ロック", "JDBC")
+                .source(CrudServlet.class)
+                .source(CustomerForm.class)
+                .source(CustomerDao.class)
+                .source(Customer.class)
+                .build());
+
+        samples.add(Sample.builder("optimistic-lock", Category.LIST)
+                .title("更新の競合（楽観ロック）")
+                .summary("2 人が同じ行を同時に編集すると、後から保存した人が相手の変更を黙って消します。"
+                        + "version 列でそれに気付き、何が違うのかを並べて見せて選ばせるところまで。"
+                        + "1 人でも競合を再現できます。")
+                .tags("楽観ロック", "悲観ロック", "更新の喪失", "version", "排他制御",
+                        "同時更新", "JDBC", "UPDATE")
+                .source(OptimisticLockServlet.class)
+                .source(CustomerDao.class)
+                .source(Customer.class)
+                .source(CustomerForm.class)
+                .build());
+
         // ------------------------------------------------------------------
         // ファイル
         // ------------------------------------------------------------------
@@ -226,6 +303,21 @@ final class SampleDefinitions {
                 .source(StoredFileDao.class)
                 .source(StoredFile.class)
                 .source(SourceFile.jsp("/WEB-INF/tags/resultModal.tag"))
+                .build());
+
+        samples.add(Sample.builder("csv-download", Category.FILE)
+                .title("CSV ダウンロード（文字化け・エスケープ対策）")
+                .summary("「Excel で開いたら文字化けした」の正体は BOM。文字コード・改行・"
+                        + "エスケープの有無を切り替えながら、組み立てた CSV をその場で見比べます。"
+                        + "日本語のファイル名と CSV インジェクション対策まで。")
+                .tags("CSV", "ダウンロード", "文字コード", "BOM", "Shift_JIS", "エスケープ",
+                        "RFC4180", "Content-Disposition", "CSVインジェクション")
+                .source(CsvDownloadServlet.class)
+                .source(CsvExportServlet.class)
+                .source(Csv.class)
+                .source(CsvOptions.class)
+                .source(SalesRecord.class)
+                .source(SalesRecords.class)
                 .build());
 
         // ------------------------------------------------------------------
@@ -271,22 +363,136 @@ final class SampleDefinitions {
                 .build());
 
         // ------------------------------------------------------------------
+        // セッション・認証
+        // ------------------------------------------------------------------
+        samples.add(Sample.builder("login", Category.SESSION)
+                .title("ログインとログアウト")
+                .summary("セッションに「ログイン済み」の印を置き、次のリクエストで確かめる。"
+                        + "パスワードのハッシュ化、ログイン成功時のセッション ID の振り直し、"
+                        + "ログアウトを POST で受ける理由まで。")
+                .tags("セッション", "ログイン", "ログアウト", "認証", "パスワード", "ハッシュ",
+                        "PBKDF2", "セッション固定攻撃", "invalidate", "PRG")
+                .source(LoginServlet.class)
+                .source(LogoutServlet.class)
+                .source(PasswordHash.class)
+                .source(UserAccounts.class)
+                .source(LoginUser.class)
+                .build());
+
+        samples.add(Sample.builder("auth-filter", Category.SESSION)
+                .title("フィルタで未ログインを弾く（認証・認可）")
+                .summary("ログイン確認を画面ごとに書くと必ず漏れる。フィルタで URL ごとに一括で掛け、"
+                        + "認証は 401、権限不足は 403 と返し分けます。"
+                        + "Ajax にリダイレクトを返してはいけない理由も。")
+                .tags("フィルタ", "認証", "認可", "ロール", "401", "403", "セッション",
+                        "オープンリダイレクト", "Ajax", "web.xml")
+                .source(AuthenticationFilter.class)
+                .source(AuthorizationFilter.class)
+                .source(AuthFilterServlet.class)
+                .source(ProtectedPageServlet.class)
+                .source(AuthApiServlet.class)
+                .source(SourceFile.of("/WEB-INF/web.xml", "web.xml", "xml"))
+                .source(SourceFile.jsp("/WEB-INF/views/samples/session/auth-filter-protected.jsp"))
+                .build());
+
+        samples.add(Sample.builder("csrf", Category.SESSION)
+                .title("CSRF 対策（ワンタイムトークン）")
+                .summary("罠のページから送られた依頼を、ログイン済みの本人からの依頼と区別する。"
+                        + "トークンを付けた場合・付けない場合・でたらめな場合を送り比べ、"
+                        + "SameSite Cookie や二重送信防止との違いも整理します。")
+                .tags("CSRF", "セキュリティ", "トークン", "セッション", "403", "SameSite",
+                        "二重送信", "POST", "SecureRandom")
+                .source(CsrfServlet.class)
+                .source(CsrfToken.class)
+                .build());
+
+        // ------------------------------------------------------------------
+        // 応用・その他
+        // ------------------------------------------------------------------
+        samples.add(Sample.builder("error-handling", Category.ADVANCED)
+                .title("エラー処理とエラーページ")
+                .summary("入力の誤り・業務上の都合・システムの異常。どれをどこで受け止め、"
+                        + "何を画面に出すか。web.xml でのエラーページの割り当て、"
+                        + "JSP の errorPage 属性、非同期通信での返し方まで。")
+                .tags("エラー処理", "例外", "エラーページ", "web.xml", "sendError", "業務例外",
+                        "ログ", "errorPage", "Ajax")
+                .source(ErrorHandlingServlet.class)
+                .source(ApplicationException.class)
+                .source(ErrorHandlingApiServlet.class)
+                .source(Validators.class)
+                .source(SourceFile.of("/WEB-INF/web.xml", "web.xml", "xml"))
+                .source(SourceFile.jsp("/WEB-INF/tags/errorDetail.tag"))
+                .source(SourceFile.jsp("/WEB-INF/views/error/500.jsp"))
+                .source(SourceFile.jsp("/WEB-INF/views/error/error.jsp"))
+                .source(SourceFile.jsp("/WEB-INF/views/error/application-error.jsp"))
+                .source(SourceFile.jsp("/WEB-INF/views/samples/advanced/error-handling-jsp.jsp"))
+                .source(SourceFile.jsp("/WEB-INF/views/samples/advanced/error-handling-jsp-error.jsp"))
+                .build());
+
+        samples.add(Sample.builder("filter", Category.ADVANCED)
+                .title("フィルタ（Filter）で共通処理をはさむ")
+                .summary("Servlet の手前と奥に共通処理を差し込む。3 つのフィルタが"
+                        + "どの順に呼ばれるかを 1 往復ぶん記録して表示し、"
+                        + "chain.doFilter を呼ばずに止めるとどうなるかも確かめます。")
+                .tags("フィルタ", "Filter", "FilterChain", "web.xml", "アクセスログ",
+                        "dispatcher", "リクエストID", "レスポンスヘッダ", "スレッドセーフ")
+                .source(RequestIdFilter.class)
+                .source(AccessLogFilter.class)
+                .source(AccessCheckFilter.class)
+                .source(FilterServlet.class)
+                .source(FilterApiServlet.class)
+                .source(FilterTrace.class)
+                .source(FilterTraceStore.class)
+                .source(SourceFile.of("/WEB-INF/web.xml", "web.xml", "xml"))
+                .build());
+
+        samples.add(Sample.builder("i18n", Category.ADVANCED)
+                .title("国際化（多言語表示）")
+                .summary("画面の文字を properties にまとめ、ロケールで切り替える。"
+                        + "Accept-Language の読み方、properties の探索順、"
+                        + "日付・数値・通貨・タイムゾーンの書式まで。")
+                .tags("国際化", "i18n", "ロケール", "ResourceBundle", "properties", "JSTL",
+                        "fmt", "Accept-Language", "タイムゾーン", "文字コード")
+                .source(I18nServlet.class)
+                .source(SourceFile.of("/WEB-INF/classes/messages_ja.properties",
+                        "messages_ja.properties", "ini"))
+                .source(SourceFile.of("/WEB-INF/classes/messages_en.properties",
+                        "messages_en.properties", "ini"))
+                .source(SourceFile.of("/WEB-INF/classes/messages.properties",
+                        "messages.properties", "ini"))
+                .build());
+
+        samples.add(Sample.builder("transaction", Category.ADVANCED)
+                .title("データベースのトランザクション（commit と rollback）")
+                .summary("口座間の振替を題材に、複数の更新を「全部やるか 1 つもやらないか」にまとめる。"
+                        + "トランザクションを使わずに途中で失敗させると、"
+                        + "出金だけが確定して残高の合計が合わなくなる様子まで確かめられます。")
+                .tags("トランザクション", "commit", "rollback", "setAutoCommit", "JDBC",
+                        "分離レベル", "排他制御", "コネクション")
+                .source(TransactionServlet.class)
+                .source(TransferDao.class)
+                .source(TransferOutcome.class)
+                .source(Account.class)
+                .source(Database.class)
+                .build());
+
+        // ------------------------------------------------------------------
         // ここから下は「これから作るサンプル」の登録例です。
         // 状態を PLANNED にしておくと、一覧にグレー表示され、リンクは張られません。
         // 実際に作るときは status(...) を外して JSP を用意してください。
         // ------------------------------------------------------------------
-        samples.add(Sample.builder("login", Category.SESSION)
-                .title("ログインとログアウト")
-                .summary("セッションにログイン情報を持たせ、未ログインなら弾く。")
+        samples.add(Sample.builder("listener", Category.ADVANCED)
+                .title("リスナーで起動・終了・セッションを捕まえる")
+                .summary("アプリの起動時と停止時、セッションの作成と破棄に処理を差し込む。")
                 .status(SampleStatus.PLANNED)
-                .tags("セッション", "ログイン", "認証", "フィルタ")
+                .tags("リスナー", "ServletContextListener", "HttpSessionListener", "起動処理")
                 .build());
 
-        samples.add(Sample.builder("error-handling", Category.ADVANCED)
-                .title("エラー処理とエラーページ")
-                .summary("例外が起きたときにどこで受け止め、何を画面に出すか。")
+        samples.add(Sample.builder("async", Category.ADVANCED)
+                .title("時間のかかる処理を非同期で動かす")
+                .summary("AsyncContext でスレッドを解放し、終わったら応答を返す。")
                 .status(SampleStatus.PLANNED)
-                .tags("エラー処理", "例外", "web.xml", "ログ")
+                .tags("非同期", "AsyncContext", "スレッド", "タイムアウト")
                 .build());
 
         return samples;
