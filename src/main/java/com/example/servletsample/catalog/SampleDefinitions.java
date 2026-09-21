@@ -50,6 +50,9 @@ import com.example.servletsample.samples.basic.LifecycleServlet;
 import com.example.servletsample.samples.basic.OrderBean;
 import com.example.servletsample.samples.basic.RequestParameterServlet;
 import com.example.servletsample.samples.basic.ScopeServlet;
+import com.example.servletsample.samples.basic.UrlMappingDemoServlet;
+import com.example.servletsample.samples.basic.UrlMappingRules;
+import com.example.servletsample.samples.basic.UrlMappingServlet;
 import com.example.servletsample.samples.design.ModalDialogEntriesServlet;
 import com.example.servletsample.samples.design.ModalDialogServlet;
 import com.example.servletsample.samples.design.ReceptionEntry;
@@ -181,9 +184,11 @@ final class SampleDefinitions {
                 .summary("@WebServlet と web.xml で URL を割り当てる。完全一致・前方一致・拡張子・既定の"
                         + "どれが選ばれるか、getContextPath / getServletPath / getPathInfo が"
                         + "それぞれ何を返すかを呼び分けて確かめます。")
-                .status(SampleStatus.PLANNED)
                 .tags("Servlet", "@WebServlet", "url-pattern", "web.xml", "getPathInfo",
                         "getServletPath", "マッピング")
+                .source(UrlMappingServlet.class)
+                .source(UrlMappingDemoServlet.class)
+                .source(UrlMappingRules.class)
                 .build());
 
         samples.add(Sample.builder("request-response", Category.BASIC)
