@@ -45,6 +45,10 @@ import com.example.servletsample.samples.basic.CharacterEncodingServlet;
 import com.example.servletsample.samples.basic.ContextPathServlet;
 import com.example.servletsample.samples.basic.CookieServlet;
 import com.example.servletsample.samples.basic.Cookies;
+import com.example.servletsample.samples.basic.DispatcherAttributes;
+import com.example.servletsample.samples.basic.DispatcherIncludeDemoServlet;
+import com.example.servletsample.samples.basic.DispatcherIncludePartServlet;
+import com.example.servletsample.samples.basic.DispatcherIncludeServlet;
 import com.example.servletsample.samples.basic.ForwardRedirectGoalServlet;
 import com.example.servletsample.samples.basic.ForwardRedirectServlet;
 import com.example.servletsample.samples.basic.HelloWorldServlet;
@@ -166,8 +170,12 @@ final class SampleDefinitions {
                 .summary("RequestDispatcher には forward のほかに include がある。"
                         + "同じ部品を複数の画面から呼び、レスポンスがどちらに書かれるか、"
                         + "呼び出し元に処理が戻ってくるかの違いを見ます。")
-                .status(SampleStatus.PLANNED)
                 .tags("RequestDispatcher", "include", "forward", "jsp:include", "部品化")
+                .source(DispatcherIncludeServlet.class)
+                .source(DispatcherIncludeDemoServlet.class)
+                .source(DispatcherIncludePartServlet.class)
+                .source(DispatcherAttributes.class)
+                .source(SourceFile.jsp("/WEB-INF/views/samples/basic/dispatcher-include-part.jsp"))
                 .build());
 
         samples.add(Sample.builder("scope", Category.BASIC)

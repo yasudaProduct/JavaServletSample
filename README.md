@@ -209,13 +209,14 @@ push (main)
 | 非同期通信 | Ajax、JSON API との連携 |
 | 応用・その他 | フィルタ、エラー処理、国際化など |
 
-現在は以下の 38 件が入っています。サンプルはこれから追加していきます。
+現在は以下の 39 件が入っています。サンプルはこれから追加していきます。
 
 | カテゴリ | サンプル | 内容 |
 | --- | --- | --- |
 | 基本 | **Hello World** | Servlet で値を用意して JSP へ転送する基本の流れ |
 | 基本 | **リクエストパラメータの受け取り方** | `getParameter` / `getParameterValues` / `getParameterMap`、null と空文字の違い、チェックボックスの落とし穴 |
 | 基本 | **forward と redirect の違い** | 同じ処理を両方で実行し、URL・スコープ・履歴・再読み込みの違いを比較 |
+| 基本 | **include と forward** | 同じ部品を forward と include で呼び比べる。forward では呼び出し元が書いた本文が捨てられ、include では戻ってくる。コンテナが置く `javax.servlet.include.*` / `forward.*` の目印まで |
 | 基本 | **スコープ** | request / session / application に値を入れて、いつまで残り誰に見えるかを確かめる |
 | 基本 | **Servlet のライフサイクルとスレッド** | 1 インスタンスに複数スレッドが入る。同時アクセスでカウンタがずれる様子を体験 |
 | 基本 | **URL と Servlet の対応づけ** | 完全一致・前方一致・拡張子一致・既定のどれが選ばれるか。URL を入れると呼ばれる Servlet と `getServletPath` / `getPathInfo` を判定し、実際に叩いて答え合わせできる |
