@@ -42,6 +42,8 @@ import com.example.servletsample.samples.ajax.AjaxPollingServlet;
 import com.example.servletsample.samples.ajax.AjaxSearchApiServlet;
 import com.example.servletsample.samples.ajax.AjaxSearchServlet;
 import com.example.servletsample.samples.basic.CharacterEncodingServlet;
+import com.example.servletsample.samples.basic.CookieServlet;
+import com.example.servletsample.samples.basic.Cookies;
 import com.example.servletsample.samples.basic.ForwardRedirectGoalServlet;
 import com.example.servletsample.samples.basic.ForwardRedirectServlet;
 import com.example.servletsample.samples.basic.HelloWorldServlet;
@@ -224,9 +226,11 @@ final class SampleDefinitions {
                 .summary("ブラウザに小さな値を預けて、次のリクエストで受け取る。"
                         + "有効期限・パス・HttpOnly・SameSite を切り替えて、"
                         + "セッション (JSESSIONID) との関係まで確かめます。")
-                .status(SampleStatus.PLANNED)
                 .tags("Cookie", "addCookie", "getCookies", "maxAge", "HttpOnly", "SameSite",
                         "JSESSIONID", "セッション")
+                .source(CookieServlet.class)
+                .source(Cookies.class)
+                .source(Flash.class)
                 .build());
 
         samples.add(Sample.builder("response-output", Category.BASIC)
