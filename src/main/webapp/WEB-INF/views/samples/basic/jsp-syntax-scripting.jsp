@@ -55,25 +55,27 @@
   このページが読み込まれた回数は <strong><%= renderCount %></strong> 回目です。
 </p>
 
-<table class="table table-sm table-bordered">
-  <thead class="thead-light">
-    <tr><th scope="col">#</th><th scope="col">品名</th><th scope="col" class="text-right">単価</th></tr>
-  </thead>
-  <tbody>
-    <%-- スクリプトレットは途中で切って HTML を挟めます (中かっこの対応に注意) --%>
-    <% for (int i = 0; i < names.size(); i++) { %>
+<div class="table-responsive">
+  <table class="table table-sm table-bordered">
+    <thead class="thead-light">
+      <tr><th scope="col">#</th><th scope="col">品名</th><th scope="col" class="text-right">単価</th></tr>
+    </thead>
+    <tbody>
+      <%-- スクリプトレットは途中で切って HTML を挟めます (中かっこの対応に注意) --%>
+      <% for (int i = 0; i < names.size(); i++) { %>
+        <tr>
+          <th scope="row"><%= i + 1 %></th>
+          <td><%= names.get(i) %></td>
+          <td class="text-right"><%= yen(prices[i]) %></td>
+        </tr>
+      <% } %>
       <tr>
-        <th scope="row"><%= i + 1 %></th>
-        <td><%= names.get(i) %></td>
-        <td class="text-right"><%= yen(prices[i]) %></td>
+        <th scope="row" colspan="2">合計</th>
+        <td class="text-right"><strong><%= yen(total) %></strong></td>
       </tr>
-    <% } %>
-    <tr>
-      <th scope="row" colspan="2">合計</th>
-      <td class="text-right"><strong><%= yen(total) %></strong></td>
-    </tr>
-  </tbody>
-</table>
+    </tbody>
+  </table>
+</div>
 
 <h4 class="h6">暗黙オブジェクト（スクリプトレットから）</h4>
 <div class="table-responsive">

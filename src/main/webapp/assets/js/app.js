@@ -4,6 +4,7 @@
  *  - ソースコードのシンタックスハイライト (highlight.js)
  *  - コードのコピーボタン
  *  - タブの状態を URL に残す (#pane-code など)
+ *  - 横に長い表に「横へスクロールできる」印を付ける (スマートフォン対策)
  */
 (function () {
   'use strict';
@@ -12,6 +13,7 @@
     highlightSourceCode();
     setupCopyButtons();
     setupTabHash();
+    setupScrollableTables();
   });
 
   /** ソースコード表示にシンタックスハイライトを適用する。 */
@@ -111,6 +113,79 @@
         // 画面がジャンプしないよう replaceState で URL だけ書き換える
         window.history.replaceState(null, '', href);
       }
+      // 隠れていた表は幅が測れないため、表示されてから測り直す
+      updateScrollableTables();
     });
+  }
+
+  /**
+   * 横にはみ出している表 (.table-responsive) に印を付ける。
+   *
+   * Bootstrap の .table-responsive は、はみ出したら横スクロールになるだけなので、
+   * スマートフォンでは「右にまだ列がある」ことに気づけません。
+   * 実際にはみ出している枠にだけ is-scrollable を付け、
+   * CSS 側で右端に影を出し、「横にスクロールできます」の案内を添えます。
+   */
+  function setupScrollableTables() {
+    var areas = document.querySelectorAll('.table-responsive');
+    if (areas.length === 0) {
+      return;
+    }
+
+    // Ajax のデモのように、あとから行が増える表もあるので幅の変化も見張る
+    var observer = (typeof window.ResizeObserver === 'function')
+      ? new window.ResizeObserver(updateScrollableTables) : null;
+
+    Array.prototype.forEach.call(areas, function (area) {
+      // スクロールしきったら影を消す (まだ続きがあるときだけ出したいため)
+      area.addEventListener('scroll', function () {
+        var atEnd = area.scrollLeft + area.clientWidth >= area.scrollWidth - 1;
+        area.classList.toggle('is-scroll-end', atEnd);
+      });
+      if (observer) {
+        observer.observe(area);
+        var table = area.querySelector('table');
+        if (table) {
+          observer.observe(table);
+        }
+      }
+    });
+
+    updateScrollableTables();
+    window.addEventListener('resize', updateScrollableTables);
+  }
+
+  /** いまの幅ではみ出しているかどうかを測り直す。 */
+  function updateScrollableTables() {
+    var areas = document.querySelectorAll('.table-responsive');
+    Array.prototype.forEach.call(areas, function (area) {
+      var scrollable = area.scrollWidth > area.clientWidth + 1;
+      area.classList.toggle('is-scrollable', scrollable);
+      if (!scrollable) {
+        area.classList.remove('is-scroll-end');
+      }
+      toggleScrollHint(area, scrollable);
+    });
+  }
+
+  /** 表のすぐ下に出す「横にスクロールできます」の案内を出し入れする。 */
+  function toggleScrollHint(area, scrollable) {
+    var next = area.nextElementSibling;
+    var hint = (next && next.classList.contains('table-scroll-hint')) ? next : null;
+
+    if (!scrollable) {
+      if (hint) {
+        hint.parentNode.removeChild(hint);
+      }
+      return;
+    }
+    if (hint) {
+      return;
+    }
+    hint = document.createElement('p');
+    hint.className = 'table-scroll-hint';
+    hint.setAttribute('aria-hidden', 'true');
+    hint.textContent = '← 表は横にスクロールできます →';
+    area.parentNode.insertBefore(hint, area.nextSibling);
   }
 })();
