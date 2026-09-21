@@ -63,6 +63,51 @@
   </session-config>
 
   <!-- ===================================================================
+       Servlet (サンプル : 基本 > 設定値の渡し方)
+
+       同じクラスを 2 回登録し、それぞれに別の <init-param> を渡しています。
+       登録した数だけインスタンスが作られ、それぞれに init() が呼ばれます。
+       「同じコードを設定違いで使い回す」という、init-param の使いどころの実例です。
+       (アノテーションでは 1 クラス 1 登録なので、この書き方はできません)
+
+       B 号機の pageSize には、わざと上限 (100) を超える値を書いています。
+       設定値も「人が手で書いた文字列」なので、読んだ側で確かめる必要があります。
+       =================================================================== -->
+  <servlet>
+    <servlet-name>servletConfigDemoA</servlet-name>
+    <servlet-class>com.example.servletsample.samples.basic.ServletConfigDemoServlet</servlet-class>
+    <init-param>
+      <param-name>label</param-name>
+      <param-value>A 号機</param-value>
+    </init-param>
+    <init-param>
+      <param-name>pageSize</param-name>
+      <param-value>10</param-value>
+    </init-param>
+  </servlet>
+  <servlet>
+    <servlet-name>servletConfigDemoB</servlet-name>
+    <servlet-class>com.example.servletsample.samples.basic.ServletConfigDemoServlet</servlet-class>
+    <init-param>
+      <param-name>label</param-name>
+      <param-value>B 号機</param-value>
+    </init-param>
+    <init-param>
+      <param-name>pageSize</param-name>
+      <param-value>500</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>servletConfigDemoA</servlet-name>
+    <url-pattern>/samples/basic/servlet-config/a</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>servletConfigDemoB</servlet-name>
+    <url-pattern>/samples/basic/servlet-config/b</url-pattern>
+  </servlet-mapping>
+
+  <!-- ===================================================================
        フィルタ (サンプル : 応用・その他 > フィルタで共通処理をはさむ)
 
        フィルタは @WebFilter アノテーションでも登録できますが、

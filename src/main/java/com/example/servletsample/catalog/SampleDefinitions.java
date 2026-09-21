@@ -57,6 +57,8 @@ import com.example.servletsample.samples.basic.RequestParameterServlet;
 import com.example.servletsample.samples.basic.RequestResponseApiServlet;
 import com.example.servletsample.samples.basic.RequestResponseServlet;
 import com.example.servletsample.samples.basic.ScopeServlet;
+import com.example.servletsample.samples.basic.ServletConfigDemoServlet;
+import com.example.servletsample.samples.basic.ServletConfigServlet;
 import com.example.servletsample.samples.basic.UrlMappingDemoServlet;
 import com.example.servletsample.samples.basic.UrlMappingRules;
 import com.example.servletsample.samples.basic.UrlMappingServlet;
@@ -249,9 +251,11 @@ final class SampleDefinitions {
                 .summary("上限値や接続先をソースに直接書かず web.xml へ出す。"
                         + "Servlet 1 つに渡す init-param とアプリ全体で使う context-param を、"
                         + "読み出すタイミングの違いも含めて比べます。")
-                .status(SampleStatus.PLANNED)
                 .tags("web.xml", "init-param", "context-param", "ServletConfig", "ServletContext",
                         "initParam", "設定")
+                .source(ServletConfigServlet.class)
+                .source(ServletConfigDemoServlet.class)
+                .source(SourceFile.of("/WEB-INF/web.xml", "web.xml", "xml"))
                 .build());
 
         samples.add(Sample.builder("jsp-basics", Category.BASIC)
