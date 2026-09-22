@@ -1,7 +1,7 @@
 <%--
   トップページ (サンプル集の目次)。
-  表示するデータは application スコープの ${catalog} と
-  HomeServlet がセットした ${featuredSamples} です。
+  表示するデータは application スコープの ${catalog} / ${topics} と
+  HomeServlet がセットした ${featuredSamples} / ${featuredTopics} です。
 --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -31,7 +31,8 @@
     </form>
     <p class="hero__stats">
       公開中のサンプル <strong>${catalog.totalCount}</strong> 件 /
-      カテゴリ <strong>${fn:length(catalog.categories)}</strong> 種類
+      カテゴリ <strong>${fn:length(catalog.categories)}</strong> 種類 /
+      座学メモ <strong>${topics.totalCount}</strong> 件
     </p>
   </section>
 
@@ -67,6 +68,30 @@
           <t:sampleCard sample="${sample}" />
         </c:forEach>
       </div>
+    </section>
+  </c:if>
+
+  <%-- ======================= 座学メモ ======================= --%>
+  <c:if test="${not empty featuredTopics}">
+    <section class="section">
+      <h2 class="section__title">
+        <t:icon name="book" cssClass="section__icon" />読むだけのメモ（座学メモ）
+      </h2>
+      <p class="text-muted mb-3">
+        サンプルにしにくい話 &mdash; サーバが 2 台になったとき、同時に 200 人が来たとき、
+        本番だけ挙動が違うとき &mdash; を読み物にしています。
+      </p>
+      <div class="row">
+        <c:forEach var="topic" items="${featuredTopics}">
+          <t:topicCard topic="${topic}" columnClass="col-md-6 col-xl-4" />
+        </c:forEach>
+      </div>
+      <p>
+        <a class="btn btn-outline-primary btn-sm" href="${ctx}/topics">
+          座学メモをすべて見る（${topics.totalCount} 件）
+          <t:icon name="chevron-right" size="12" cssClass="ml-1" />
+        </a>
+      </p>
     </section>
   </c:if>
 
