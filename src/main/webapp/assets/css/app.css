@@ -1214,3 +1214,240 @@ pre.code-snippet code {
     padding-right: .5rem;
   }
 }
+
+/* ================================================================
+   アクセシビリティのサンプル (samples/a11y/*) で使う見た目
+
+   デモの中身は Bootstrap 4 の標準クラスのままにしてありますが、
+   「良い例 / 悪い例」の並べ方や、普段は見えないものを見せる仕掛けだけ
+   ここに置いています。
+   ================================================================ */
+
+/* ---------------------------------------------------------------- 本文へスキップ */
+/*
+  Bootstrap の .sr-only は「画面には出ないが読み上げられる」状態、
+  .sr-only-focusable は「フォーカスが当たったときだけ見える」状態にします。
+  見える位置と色だけをここで足しています。
+*/
+.skip-link.sr-only-focusable:focus,
+.skip-link.sr-only-focusable:active {
+  position: fixed;
+  top: .5rem;
+  left: .5rem;
+  z-index: 1080;
+  padding: .5rem .875rem;
+  background-color: var(--site-accent);
+  color: #fff;
+  border-radius: var(--site-radius);
+  box-shadow: 0 2px 10px rgba(16, 24, 40, .25);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* main にフォーカスを移したときに枠が出ないようにする (移動先を示すだけなので) */
+.site-main:focus {
+  outline: none;
+}
+
+/* ---------------------------------------------------------------- 良い例 / 悪い例 */
+.a11y-compare {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -.5rem;
+}
+
+.a11y-compare > * {
+  flex: 1 1 15rem;
+  min-width: 0;
+  padding: 0 .5rem;
+  margin-bottom: 1rem;
+}
+
+.a11y-case {
+  height: 100%;
+  padding: .875rem 1rem 1rem;
+  border: 1px solid var(--site-border);
+  border-radius: var(--site-radius);
+  background-color: #fff;
+}
+
+.a11y-case--bad {
+  border-color: #f0c3c8;
+  background-color: #fdf6f7;
+}
+
+.a11y-case--good {
+  border-color: #bfe0c9;
+  background-color: #f5fbf7;
+}
+
+.a11y-case__label {
+  display: block;
+  margin-bottom: .75rem;
+  font-size: .8125rem;
+  font-weight: 700;
+}
+
+.a11y-case--bad .a11y-case__label {
+  color: #a32b3b;
+}
+
+.a11y-case--good .a11y-case__label {
+  color: #1c7a45;
+}
+
+/* ---------------------------------------------------------------- 属性の表示 */
+/* 入力欄の下に「今この属性が付いています」と出す小さな注記 */
+.a11y-attr {
+  display: block;
+  margin-top: .375rem;
+  font-family: var(--site-mono);
+  font-size: .75rem;
+  color: var(--site-muted);
+  /* 長い属性の並びでも枠からはみ出さない。break-all と違い、まず空白で折り返す */
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------- タップ領域 */
+.a11y-tap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--site-accent);
+  border-radius: var(--site-radius);
+  background-color: #fff;
+  color: var(--site-accent);
+  font-size: .8125rem;
+  line-height: 1;
+}
+
+.a11y-tap--small {
+  min-width: 24px;
+  min-height: 24px;
+  padding: 2px 4px;
+}
+
+.a11y-tap--ok {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px 8px;
+}
+
+/* ---------------------------------------------------------------- フォーカス */
+/* 悪い例: フォーカスの枠を消してしまう */
+.a11y-focus-none:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* 良い例: マウスでは出さず、キーボードのときだけはっきり出す */
+.a11y-focus-visible:focus {
+  outline: 3px solid var(--site-accent);
+  outline-offset: 2px;
+}
+
+.a11y-focus-visible:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.a11y-focus-visible:focus-visible {
+  outline: 3px solid var(--site-accent);
+  outline-offset: 2px;
+}
+
+/* Tab の順番を確かめるための箱 */
+.a11y-taborder {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.a11y-taborder > * {
+  margin: 0 .5rem .5rem 0;
+}
+
+/* ---------------------------------------------------------------- 読み上げ内容を見せる */
+/*
+  普段は見えない .sr-only の中身を、この枠の中だけ見えるようにします
+  (スクリーンリーダーが何を読んでいるかを目で確かめるため)。
+*/
+.a11y-reveal .sr-only {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: .0625rem .25rem !important;
+  margin: 0 .125rem !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+  border-radius: 3px;
+  background-color: #fff3cd;
+  color: #7a5b00;
+  font-size: .8125rem;
+}
+
+/* ---------------------------------------------------------------- 色とコントラスト */
+.a11y-swatch {
+  display: block;
+  padding: .75rem;
+  border: 1px solid var(--site-border);
+  border-radius: var(--site-radius);
+  margin-bottom: .5rem;
+}
+
+.a11y-swatch__ratio {
+  display: block;
+  margin-top: .25rem;
+  font-family: var(--site-mono);
+  font-size: .75rem;
+  opacity: .85;
+}
+
+/* ---------------------------------------------------------------- 動きのデモ */
+.a11y-motion {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--site-radius);
+  background-color: var(--site-accent);
+  animation: a11y-slide 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes a11y-slide {
+  from { transform: translateX(0); }
+  to   { transform: translateX(6rem); }
+}
+
+/*
+  「動きを減らす」設定 (OS のアクセシビリティ設定) が入っている端末では止めます。
+  Windows: 設定 > アクセシビリティ > 視覚効果 > アニメーション効果
+  iOS / macOS: 設定 > アクセシビリティ > 動作 > 視差効果を減らす
+*/
+@media (prefers-reduced-motion: reduce) {
+  .a11y-motion {
+    animation: none;
+  }
+}
+
+.a11y-motion-state::after {
+  content: "この端末は「動きを減らす」設定が入っていません（四角は動きます）";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .a11y-motion-state::after {
+    content: "この端末は「動きを減らす」設定が入っています（四角は止まります）";
+  }
+}
+
+/* ---------------------------------------------------------------- 横スクロール表のフォーカス */
+/*
+  app.js が、はみ出している表の枠に tabindex="0" を付けます
+  (キーボードでも横にスクロールできるようにするため)。
+  どこにいるかが分かるよう、キーボード操作のときだけ枠を出します。
+*/
+.table-responsive:focus {
+  outline: 3px solid var(--site-accent);
+  outline-offset: 2px;
+}
+
+.table-responsive:focus:not(:focus-visible) {
+  outline: none;
+}

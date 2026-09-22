@@ -9,6 +9,7 @@ import com.example.servletsample.common.Flash;
 import com.example.servletsample.common.Json;
 import com.example.servletsample.common.ValidationErrors;
 import com.example.servletsample.common.Validators;
+import com.example.servletsample.samples.a11y.ErrorSummaryServlet;
 import com.example.servletsample.samples.advanced.AccessCheckFilter;
 import com.example.servletsample.samples.advanced.AccessLogFilter;
 import com.example.servletsample.samples.advanced.Account;
@@ -322,6 +323,97 @@ final class SampleDefinitions {
                 .source(ReceptionEntry.class)
                 .source(Flash.class)
                 .source(SourceFile.jsp("/WEB-INF/views/samples/design/modal-dialog-entries.jsp"))
+                .build());
+
+        // ------------------------------------------------------------------
+        // アクセシビリティ
+        // ------------------------------------------------------------------
+        samples.add(Sample.builder("mobile-keyboard", Category.ACCESSIBILITY)
+                .title("スマホで開くキーボードを切り替える")
+                .summary("type / inputmode / enterkeyhint で、電話番号や郵便番号の欄に数字キーボードを出す。"
+                        + "業務システムで type=\"number\" を使ってはいけない理由も、"
+                        + "実際に値がどう壊れるかを並べて確かめます。")
+                .tags("アクセシビリティ", "スマートフォン", "inputmode", "enterkeyhint", "type",
+                        "フォーム", "キーボード", "HTML")
+                .build());
+
+        samples.add(Sample.builder("autocomplete", Category.ACCESSIBILITY)
+                .title("自動入力（autocomplete）と、余計なお節介を切る")
+                .summary("住所・氏名・パスワードをブラウザに補完させるトークンの書き方と、"
+                        + "社員コードの欄で iOS の自動大文字化・自動修正を止める指定。")
+                .tags("アクセシビリティ", "autocomplete", "自動入力", "autocapitalize", "one-time-code",
+                        "住所", "フォーム", "HTML", "WCAG")
+                .build());
+
+        samples.add(Sample.builder("form-labels", Category.ACCESSIBILITY)
+                .title("ラベルの付け方と入力欄のグループ化")
+                .summary("label for / fieldset / legend / aria-describedby という、"
+                        + "フォームの骨組み。placeholder をラベル代わりにしない理由と、"
+                        + "タップできる大きさの目安まで。")
+                .tags("アクセシビリティ", "label", "fieldset", "legend", "aria-describedby",
+                        "placeholder", "必須", "フォーム", "HTML")
+                .build());
+
+        samples.add(Sample.builder("error-summary", Category.ACCESSIBILITY)
+                .title("エラーの伝え方（エラーサマリとフォーカス移動）")
+                .summary("画面の先頭にエラーの一覧を出し、そこへフォーカスを移して、"
+                        + "各項目へリンクで飛べるようにする。aria-invalid と aria-describedby、"
+                        + "色だけに頼らないメッセージの書き方まで。")
+                .tags("アクセシビリティ", "エラー", "エラーサマリ", "aria-invalid", "role=alert",
+                        "フォーカス", "バリデーション", "フォーム")
+                .source(ErrorSummaryServlet.class)
+                .source(ValidationErrors.class)
+                .source(Validators.class)
+                .build());
+
+        samples.add(Sample.builder("keyboard-operation", Category.ACCESSIBILITY)
+                .title("マウスを使わずに操作する")
+                .summary("Tab の順番、tabindex の使い分け、:focus-visible、「本文へスキップ」リンク、"
+                        + "モーダルのフォーカストラップ。div をボタンにすると何が起きるかを並べて確かめます。")
+                .tags("アクセシビリティ", "キーボード", "フォーカス", "tabindex", "focus-visible",
+                        "スキップリンク", "モーダル", "button")
+                .source(SourceFile.jsp("/WEB-INF/tags/layout.tag"))
+                .build());
+
+        samples.add(Sample.builder("live-region", Category.ACCESSIBILITY)
+                .title("画面の変化を読み上げで知らせる（aria-live）")
+                .summary("Ajax で一部だけ書き換えたとき、その変化を音でも伝える。"
+                        + "role=status と role=alert の使い分け、進捗バーの aria-valuenow、aria-busy。")
+                .tags("アクセシビリティ", "aria-live", "role=status", "role=alert", "progressbar",
+                        "aria-busy", "Ajax", "JavaScript")
+                .build());
+
+        samples.add(Sample.builder("accessible-table", Category.ACCESSIBILITY)
+                .title("表を読み上げと相性よく作る")
+                .summary("caption / th scope / aria-sort と、横に長い表をキーボードでもスクロールできるようにする方法。"
+                        + "レイアウト目的で table を使わない、空セルを空のままにしない、といった定番の注意も。")
+                .tags("アクセシビリティ", "テーブル", "caption", "scope", "aria-sort",
+                        "table-responsive", "一覧", "HTML")
+                .build());
+
+        samples.add(Sample.builder("alt-text", Category.ACCESSIBILITY)
+                .title("画像とアイコンの代替テキスト")
+                .summary("alt の書き分け（意味のある画像・装飾・リンクの中・グラフ）、"
+                        + "アイコンだけのボタンに aria-label を付ける、"
+                        + "画面に出さず読み上げにだけ足す .sr-only の使い方。")
+                .tags("アクセシビリティ", "alt", "aria-label", "aria-hidden", "sr-only",
+                        "アイコン", "SVG", "リンク")
+                .build());
+
+        samples.add(Sample.builder("visual-design", Category.ACCESSIBILITY)
+                .title("色・コントラスト・拡大・動きへの配慮")
+                .summary("コントラスト比の基準と Bootstrap 4 の既定色の実測、色だけに頼らない伝え方、"
+                        + "200% に拡大しても壊れない組み方、prefers-reduced-motion。")
+                .tags("アクセシビリティ", "コントラスト", "色", "拡大", "リフロー",
+                        "prefers-reduced-motion", "CSS", "WCAG")
+                .build());
+
+        samples.add(Sample.builder("a11y-check", Category.ACCESSIBILITY)
+                .title("自分の画面をチェックする手順")
+                .summary("キーボードで一周する、200% に拡大する、色を抜く、Lighthouse や axe を掛ける、"
+                        + "読み上げを聞く。10 分でできる点検の手順と、そのまま使えるチェックリスト。")
+                .tags("アクセシビリティ", "チェック", "Lighthouse", "axe", "スクリーンリーダー",
+                        "WCAG", "JIS X 8341-3", "NVDA", "VoiceOver")
                 .build());
 
         // ------------------------------------------------------------------
