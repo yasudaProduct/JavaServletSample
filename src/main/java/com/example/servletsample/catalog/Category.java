@@ -20,7 +20,8 @@ public enum Category {
     SESSION("session", "セッション・認証", "ログイン、スコープ、権限チェック", "shield-lock"),
     FILE("file", "ファイル", "アップロード、ダウンロード、CSV / PDF 出力", "file-earmark-arrow-up"),
     AJAX("ajax", "非同期通信", "Ajax、JSON API との連携", "arrow-repeat"),
-    ADVANCED("advanced", "応用・その他", "フィルタ、エラー処理、国際化など", "gear");
+    ADVANCED("advanced", "応用・その他", "フィルタ、エラー処理、国際化など", "gear"),
+    TESTING("test", "テスト", "JUnit 5 で単体テストを書く（計算・サービス・Servlet）", "check-circle");
 
     private final String id;
     private final String label;

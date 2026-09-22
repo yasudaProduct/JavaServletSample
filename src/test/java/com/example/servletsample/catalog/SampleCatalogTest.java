@@ -23,6 +23,9 @@ import org.junit.jupiter.api.Test;
  */
 class SampleCatalogTest {
 
+    /** ビルドで {@code src/main/resources} が配られる先。 */
+    private static final String CLASSES_ROOT = "/WEB-INF/classes";
+
     private final SampleCatalog catalog = SampleCatalog.getInstance();
 
     @Test
@@ -63,6 +66,41 @@ class SampleCatalogTest {
             Path view = webapp.resolve(sample.getViewPath().substring(1));
             assertTrue(Files.exists(view), "JSP が見つかりません: " + view);
         }
+    }
+
+    @Test
+    @DisplayName("登録したソースファイルが実際に存在する")
+    void sourceFilesExist() {
+        for (Sample sample : catalog.getVisitableSamples()) {
+            for (SourceFile source : sample.getSources()) {
+                assertTrue(Files.exists(toLocalPath(source)),
+                        sample.getId() + " のソースが見つかりません: " + source.getPath());
+            }
+        }
+    }
+
+    /**
+     * ServletContext 上のパスを、リポジトリ内のファイルの場所に読み替える。
+     *
+     * <p>Java とテストコードは WAR にコピーして配っている (pom.xml の maven-war-plugin) ため、
+     * 配置先と置き場所が違います。</p>
+     */
+    private static Path toLocalPath(SourceFile source) {
+        String path = source.getPath();
+        if (path.startsWith(SourceFile.JAVA_TEST_ROOT)) {
+            return Paths.get("src", "test", "java")
+                    .resolve(path.substring(SourceFile.JAVA_TEST_ROOT.length() + 1));
+        }
+        if (path.startsWith(SourceFile.JAVA_ROOT)) {
+            return Paths.get("src", "main", "java")
+                    .resolve(path.substring(SourceFile.JAVA_ROOT.length() + 1));
+        }
+        if (path.startsWith(CLASSES_ROOT)) {
+            // messages.properties などは src/main/resources から WEB-INF/classes へ配られる
+            return Paths.get("src", "main", "resources")
+                    .resolve(path.substring(CLASSES_ROOT.length() + 1));
+        }
+        return Paths.get("src", "main", "webapp").resolve(path.substring(1));
     }
 
     @Test

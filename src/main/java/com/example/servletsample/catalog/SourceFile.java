@@ -14,6 +14,9 @@ public final class SourceFile {
     /** Java のソースを WAR に取り込んでいる場所 (pom.xml の maven-war-plugin 参照)。 */
     public static final String JAVA_ROOT = "/WEB-INF/sources/java";
 
+    /** テストコード (src/test/java) を WAR に取り込んでいる場所。 */
+    public static final String JAVA_TEST_ROOT = "/WEB-INF/sources/test";
+
     private final String path;
     private final String label;
     private final String language;
@@ -36,6 +39,21 @@ public final class SourceFile {
             binaryName = binaryName.substring(0, nested);
         }
         String path = JAVA_ROOT + "/" + binaryName.replace('.', '/') + ".java";
+        return new SourceFile(path, null, "java");
+    }
+
+    /**
+     * テストコード (src/test/java) を完全修飾クラス名で指定する。
+     *
+     * <p>テストクラスは本体のクラスパスに載っていない (コンパイル対象が別) ため、
+     * {@link #of(Class)} のようにクラスリテラルでは書けません。文字列で指定しますが、
+     * 綴りを間違えると画面に出ないだけで気付きにくいので、
+     * {@code SampleCatalogTest} がファイルの実在を検査しています。</p>
+     *
+     * <pre>{@code SourceFile.test("com.example.servletsample.samples.test.OrderPricingTest")}</pre>
+     */
+    public static SourceFile test(String binaryName) {
+        String path = JAVA_TEST_ROOT + "/" + binaryName.replace('.', '/') + ".java";
         return new SourceFile(path, null, "java");
     }
 

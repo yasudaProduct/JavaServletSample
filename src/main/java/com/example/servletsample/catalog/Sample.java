@@ -167,6 +167,11 @@ public final class Sample {
             return this;
         }
 
+        /** テストコードのソースを完全修飾クラス名で追加する。 */
+        public Builder testSource(String binaryName) {
+            return source(SourceFile.test(binaryName));
+        }
+
         /** Java クラスのソースを追加する。 */
         public Builder source(Class<?> type) {
             return source(SourceFile.of(type));
