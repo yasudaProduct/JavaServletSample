@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.example.servletsample.catalog.Category;
 import com.example.servletsample.catalog.Sample;
+import com.example.servletsample.catalog.Topic;
+import com.example.servletsample.catalog.TopicGroup;
 import com.example.servletsample.common.BaseServlet;
 
 /**
@@ -33,7 +35,20 @@ public class HomeServlet extends BaseServlet {
             throws ServletException, IOException {
 
         request.setAttribute("featuredSamples", pickup());
+        request.setAttribute("featuredTopics", pickupTopics());
         render(request, response, "home");
+    }
+
+    /** トップページに並べる座学メモを選ぶ (グループごとに先頭の 1 件)。 */
+    private List<Topic> pickupTopics() {
+        List<Topic> picked = new ArrayList<>();
+        for (TopicGroup group : topics().getGroups()) {
+            topics().byGroup(group).stream()
+                    .filter(Topic::isVisitable)
+                    .findFirst()
+                    .ifPresent(picked::add);
+        }
+        return picked;
     }
 
     /**

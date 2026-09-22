@@ -21,9 +21,11 @@
     if (typeof window.hljs === 'undefined') {
       return;
     }
-    // ソースコード表示のほか、解説やデモに書いた短いコード片も色付けする
+    // ソースコード表示のほか、解説・デモ・座学メモに書いた短いコード片も色付けする
+    // (座学メモの図は <pre class="topic-figure"> で <code> を持たないため対象外になる)
     var blocks = document.querySelectorAll(
-      '.code-block__code code, .sample-note pre code, pre.code-snippet code');
+      '.code-block__code code, .sample-note pre code, pre.code-snippet code, '
+      + '.topic-body pre code');
     Array.prototype.forEach.call(blocks, function (block) {
       window.hljs.highlightElement(block);
     });
