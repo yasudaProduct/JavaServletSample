@@ -42,15 +42,33 @@ import com.example.servletsample.samples.ajax.AjaxPollingApiServlet;
 import com.example.servletsample.samples.ajax.AjaxPollingServlet;
 import com.example.servletsample.samples.ajax.AjaxSearchApiServlet;
 import com.example.servletsample.samples.ajax.AjaxSearchServlet;
+import com.example.servletsample.samples.basic.CharacterEncodingServlet;
+import com.example.servletsample.samples.basic.ContextPathServlet;
+import com.example.servletsample.samples.basic.CookieServlet;
+import com.example.servletsample.samples.basic.Cookies;
+import com.example.servletsample.samples.basic.DispatcherAttributes;
+import com.example.servletsample.samples.basic.DispatcherIncludeDemoServlet;
+import com.example.servletsample.samples.basic.DispatcherIncludePartServlet;
+import com.example.servletsample.samples.basic.DispatcherIncludeServlet;
 import com.example.servletsample.samples.basic.ForwardRedirectGoalServlet;
 import com.example.servletsample.samples.basic.ForwardRedirectServlet;
 import com.example.servletsample.samples.basic.HelloWorldServlet;
 import com.example.servletsample.samples.basic.JspBasicsServlet;
 import com.example.servletsample.samples.basic.LifecycleCounterApiServlet;
 import com.example.servletsample.samples.basic.LifecycleServlet;
+import com.example.servletsample.samples.basic.Mojibake;
 import com.example.servletsample.samples.basic.OrderBean;
 import com.example.servletsample.samples.basic.RequestParameterServlet;
+import com.example.servletsample.samples.basic.RequestResponseApiServlet;
+import com.example.servletsample.samples.basic.RequestResponseServlet;
+import com.example.servletsample.samples.basic.ResponseOutputDemoServlet;
+import com.example.servletsample.samples.basic.ResponseOutputServlet;
 import com.example.servletsample.samples.basic.ScopeServlet;
+import com.example.servletsample.samples.basic.ServletConfigDemoServlet;
+import com.example.servletsample.samples.basic.ServletConfigServlet;
+import com.example.servletsample.samples.basic.UrlMappingDemoServlet;
+import com.example.servletsample.samples.basic.UrlMappingRules;
+import com.example.servletsample.samples.basic.UrlMappingServlet;
 import com.example.servletsample.samples.design.ModalDialogEntriesServlet;
 import com.example.servletsample.samples.design.ModalDialogServlet;
 import com.example.servletsample.samples.design.ReceptionEntry;
@@ -148,6 +166,19 @@ final class SampleDefinitions {
                 .source(SourceFile.jsp("/WEB-INF/views/samples/basic/forward-redirect-goal.jsp"))
                 .build());
 
+        samples.add(Sample.builder("dispatcher-include", Category.BASIC)
+                .title("include と forward（画面の一部を差し込む）")
+                .summary("RequestDispatcher には forward のほかに include がある。"
+                        + "同じ部品を複数の画面から呼び、レスポンスがどちらに書かれるか、"
+                        + "呼び出し元に処理が戻ってくるかの違いを見ます。")
+                .tags("RequestDispatcher", "include", "forward", "jsp:include", "部品化")
+                .source(DispatcherIncludeServlet.class)
+                .source(DispatcherIncludeDemoServlet.class)
+                .source(DispatcherIncludePartServlet.class)
+                .source(DispatcherAttributes.class)
+                .source(SourceFile.jsp("/WEB-INF/views/samples/basic/dispatcher-include-part.jsp"))
+                .build());
+
         samples.add(Sample.builder("scope", Category.BASIC)
                 .title("スコープ (request / session / application)")
                 .summary("値をどこに置くかで、いつまで残り、誰に見えるかが変わる。"
@@ -166,6 +197,77 @@ final class SampleDefinitions {
                 .source(LifecycleServlet.class)
                 .source(LifecycleCounterApiServlet.class)
                 .source(Json.class)
+                .build());
+
+        samples.add(Sample.builder("url-mapping", Category.BASIC)
+                .title("URL と Servlet の対応づけ（url-pattern の優先順位）")
+                .summary("@WebServlet と web.xml で URL を割り当てる。完全一致・前方一致・拡張子・既定の"
+                        + "どれが選ばれるか、getContextPath / getServletPath / getPathInfo が"
+                        + "それぞれ何を返すかを呼び分けて確かめます。")
+                .tags("Servlet", "@WebServlet", "url-pattern", "web.xml", "getPathInfo",
+                        "getServletPath", "マッピング")
+                .source(UrlMappingServlet.class)
+                .source(UrlMappingDemoServlet.class)
+                .source(UrlMappingRules.class)
+                .build());
+
+        samples.add(Sample.builder("request-response", Category.BASIC)
+                .title("リクエストとレスポンスの中身を見る")
+                .summary("Servlet は HTTP を Java のオブジェクトにしたもの。"
+                        + "メソッド・URL・ヘッダを一覧で確かめ、ステータスコードやヘッダを"
+                        + "自分で決めて返してみます。")
+                .tags("HTTP", "リクエストヘッダ", "レスポンスヘッダ", "ステータスコード",
+                        "setStatus", "sendError", "Content-Type")
+                .source(RequestResponseServlet.class)
+                .source(RequestResponseApiServlet.class)
+                .source(Json.class)
+                .source(Validators.class)
+                .build());
+
+        samples.add(Sample.builder("character-encoding", Category.BASIC)
+                .title("文字コードと文字化け")
+                .summary("日本語が「????」や「譁?ｭ怜喧」になるのはどこで起きるのか。"
+                        + "リクエストの読み方・レスポンスの書き方・HTML の宣言を切り替えて、"
+                        + "化ける瞬間と直し方を見比べます。")
+                .tags("文字コード", "文字化け", "UTF-8", "setCharacterEncoding",
+                        "request-character-encoding", "Content-Type", "POST", "GET")
+                .source(CharacterEncodingServlet.class)
+                .source(Mojibake.class)
+                .build());
+
+        samples.add(Sample.builder("cookie", Category.BASIC)
+                .title("Cookie の基本")
+                .summary("ブラウザに小さな値を預けて、次のリクエストで受け取る。"
+                        + "有効期限・パス・HttpOnly・SameSite を切り替えて、"
+                        + "セッション (JSESSIONID) との関係まで確かめます。")
+                .tags("Cookie", "addCookie", "getCookies", "maxAge", "HttpOnly", "SameSite",
+                        "JSESSIONID", "セッション")
+                .source(CookieServlet.class)
+                .source(Cookies.class)
+                .source(Flash.class)
+                .build());
+
+        samples.add(Sample.builder("response-output", Category.BASIC)
+                .title("Servlet から直接出力する（getWriter とバッファ）")
+                .summary("JSP を使わずに HTML・テキスト・JSON を書き出す。"
+                        + "Content-Type で見え方が変わること、書き始めたあとに forward すると"
+                        + "例外になること、バッファと flush の関係を確かめます。")
+                .tags("getWriter", "Content-Type", "PrintWriter", "バッファ", "flushBuffer",
+                        "IllegalStateException", "getOutputStream")
+                .source(ResponseOutputServlet.class)
+                .source(ResponseOutputDemoServlet.class)
+                .build());
+
+        samples.add(Sample.builder("servlet-config", Category.BASIC)
+                .title("設定値の渡し方（init-param と context-param）")
+                .summary("上限値や接続先をソースに直接書かず web.xml へ出す。"
+                        + "Servlet 1 つに渡す init-param とアプリ全体で使う context-param を、"
+                        + "読み出すタイミングの違いも含めて比べます。")
+                .tags("web.xml", "init-param", "context-param", "ServletConfig", "ServletContext",
+                        "initParam", "設定")
+                .source(ServletConfigServlet.class)
+                .source(ServletConfigDemoServlet.class)
+                .source(SourceFile.of("/WEB-INF/web.xml", "web.xml", "xml"))
                 .build());
 
         samples.add(Sample.builder("jsp-basics", Category.BASIC)
@@ -189,6 +291,15 @@ final class SampleDefinitions {
                 .source(SourceFile.jsp("/WEB-INF/views/samples/basic/jsp-syntax-part.jspf"))
                 .source(SourceFile.jsp("/WEB-INF/views/samples/basic/jsp-syntax-included.jsp"))
                 .source(SourceFile.jsp("/WEB-INF/views/samples/basic/jsp-syntax-comments.jsp"))
+                .build());
+
+        samples.add(Sample.builder("context-path", Category.BASIC)
+                .title("コンテキストパスと相対パス（リンクが 404 になる）")
+                .summary("画像や CSS へのリンクが配備先で切れるのはなぜか。"
+                        + "「/ 始まり」「相対」「${pageContext.request.contextPath} 付き」の 3 通りを並べ、"
+                        + "forward したあとにどこを指すかまで見比べます。")
+                .tags("contextPath", "相対パス", "リンク", "404", "pageContext", "sendRedirect", "配備")
+                .source(ContextPathServlet.class)
                 .build());
 
         // ------------------------------------------------------------------
