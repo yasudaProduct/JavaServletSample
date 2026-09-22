@@ -793,6 +793,123 @@ pre.code-snippet code {
   font-size: inherit;
 }
 
+/* ---------------------------------------------------------------- 座学メモ */
+.badge-topic {
+  background-color: #f1ecff;
+  color: #4b34a8;
+  font-weight: 600;
+}
+
+a.badge-topic:hover {
+  background-color: #e7e0ff;
+  color: #4b34a8;
+  text-decoration: none;
+}
+
+/* 「約 8 分」などの目安。バッジと同じ行に並べるので高さを合わせる */
+.topic-reading {
+  display: inline-flex;
+  align-items: center;
+  font-size: .75rem;
+  color: var(--site-muted);
+}
+
+.topic-card {
+  border-left: 3px solid #cbbcf5;
+}
+
+/* 本文が長くなるので、サンプルの解説タブより行間を少し広めに取る */
+.topic-body {
+  max-width: 54rem;
+}
+
+.topic-body h3 {
+  font-size: .9375rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: .5rem;
+}
+
+.topic-body > *:last-child {
+  margin-bottom: 0;
+}
+
+/* 図 (アスキーアート) は等幅で崩さずに出す */
+.topic-figure {
+  font-family: var(--site-mono);
+  font-size: .78125rem;
+  line-height: 1.7;
+  background-color: #fafbfd;
+  border: 1px solid var(--site-border);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+/*
+  記事中のコード片。解説タブ (.sample-note pre) と同じ見た目にそろえます。
+  クラス付きの <pre> (.topic-figure) は独自の指定を持つので対象外にしています。
+*/
+.topic-body pre:not([class]) {
+  font-family: var(--site-mono);
+  font-size: .8125rem;
+  line-height: 1.7;
+  background-color: #fafbfd;
+  border: 1px solid var(--site-border);
+  border-radius: 6px;
+  padding: .875rem 1rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.topic-body pre:not([class]) code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* 「よくある勘違い」「覚えておくこと」などの囲み */
+.topic-callout {
+  border: 1px solid var(--site-border);
+  border-left: 3px solid var(--site-accent);
+  border-radius: 6px;
+  background-color: var(--site-accent-soft);
+  padding: .875rem 1rem;
+  margin: 1.25rem 0;
+}
+
+.topic-callout--warn {
+  border-left-color: #d98b2b;
+  background-color: #fdf5e9;
+}
+
+.topic-callout__title {
+  font-weight: 700;
+  font-size: .875rem;
+  margin-bottom: .375rem;
+}
+
+.topic-callout > *:last-child {
+  margin-bottom: 0;
+}
+
+/* セクション見出しの右に出す件数 */
+.section__count {
+  font-size: .8125rem;
+  font-weight: 400;
+  color: var(--site-muted);
+  margin-left: .5rem;
+}
+
+/* サイドバーの 2 つめの見出し (カテゴリの下に置く「座学メモ」) */
+.site-sidebar__title--second {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--site-border);
+}
+
 /* ---------------------------------------------------------------- 前後リンク */
 .sample-pager {
   display: flex;

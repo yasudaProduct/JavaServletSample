@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.example.servletsample.catalog.SampleCatalog;
+import com.example.servletsample.catalog.TopicCatalog;
 
 /**
  * このサンプル集の Servlet が共通で使う土台。
@@ -43,5 +44,10 @@ public abstract class BaseServlet extends HttpServlet {
     /** サンプルカタログ。 */
     protected SampleCatalog catalog() {
         return SampleCatalog.getInstance();
+    }
+
+    /** 座学メモのカタログ。 */
+    protected TopicCatalog topics() {
+        return TopicCatalog.getInstance();
     }
 }

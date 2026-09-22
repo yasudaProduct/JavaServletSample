@@ -1,5 +1,6 @@
 <%--
-  検索結果。SearchServlet が ${keyword} と ${results} をセットします。
+  検索結果。SearchServlet が ${keyword} / ${results} (サンプル) /
+  ${topicResults} (座学メモ) をセットします。
 --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -17,7 +18,7 @@
       <h1 class="page-header__title">検索結果</h1>
       <p class="page-header__lead">
         <c:choose>
-          <c:when test="${empty keyword}">キーワードを入力すると、タイトル・説明・タグから検索します。</c:when>
+          <c:when test="${empty keyword}">キーワードを入力すると、サンプルと座学メモをタイトル・説明・タグから検索します。</c:when>
           <c:otherwise>「<strong>${fn:escapeXml(keyword)}</strong>」の検索結果</c:otherwise>
         </c:choose>
       </p>
@@ -35,20 +36,41 @@
     </div>
 
     <c:choose>
-      <c:when test="${empty results}">
+      <c:when test="${empty results and empty topicResults}">
         <div class="empty-state">
           <t:icon name="search" size="32" cssClass="empty-state__icon" />
-          <p class="empty-state__text">一致するサンプルが見つかりませんでした。</p>
+          <p class="empty-state__text">一致するサンプル・座学メモが見つかりませんでした。</p>
           <a class="btn btn-outline-primary btn-sm" href="${ctx}/">ホームへ戻る</a>
         </div>
       </c:when>
       <c:otherwise>
-        <p class="list-count">${fn:length(results)} 件</p>
-        <div class="row">
-          <c:forEach var="sample" items="${results}">
-            <t:sampleCard sample="${sample}" />
-          </c:forEach>
-        </div>
+        <c:if test="${not empty results}">
+          <section class="section">
+            <h2 class="section__title">
+              <t:icon name="grid" cssClass="section__icon" />サンプル
+              <span class="section__count">${fn:length(results)} 件</span>
+            </h2>
+            <div class="row">
+              <c:forEach var="sample" items="${results}">
+                <t:sampleCard sample="${sample}" />
+              </c:forEach>
+            </div>
+          </section>
+        </c:if>
+
+        <c:if test="${not empty topicResults}">
+          <section class="section">
+            <h2 class="section__title">
+              <t:icon name="book" cssClass="section__icon" />座学メモ
+              <span class="section__count">${fn:length(topicResults)} 件</span>
+            </h2>
+            <div class="row">
+              <c:forEach var="topic" items="${topicResults}">
+                <t:topicCard topic="${topic}" />
+              </c:forEach>
+            </div>
+          </section>
+        </c:if>
       </c:otherwise>
     </c:choose>
   </jsp:body>
