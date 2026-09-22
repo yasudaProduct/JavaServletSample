@@ -99,6 +99,18 @@
                 <include>**/*.java</include>
               </includes>
             </resource>
+            <!--
+              テストのサンプル (カテゴリ「テスト」) では、テストコードそのものを
+              画面に表示します。src/test/java はビルド成果物に含まれないため、
+              ソース表示用に WAR へコピーしています (クラスは同梱しません)。
+            -->
+            <resource>
+              <directory>src/test/java</directory>
+              <targetPath>WEB-INF/sources/test</targetPath>
+              <includes>
+                <include>**/*.java</include>
+              </includes>
+            </resource>
           </webResources>
         </configuration>
       </plugin>

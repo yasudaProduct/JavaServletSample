@@ -374,6 +374,7 @@ Sample.builder("sample-id", Category.LIST)
         .status(SampleStatus.PLANNED)          // 準備中（グレー表示・リンク無し）
         .tags("タグ1", "タグ2")                 // 検索対象になる
         .source(FooServlet.class)              // Java のソースを表示
+        .testSource("com.example...FooTest")   // テストコードを表示（完全修飾クラス名）
         .source(SourceFile.css("/WEB-INF/..."))// 任意のファイルを表示
         .path("/samples/list/custom-url")      // URL を既定から変える
         .viewPath("/WEB-INF/views/other.jsp")  // JSP の場所を既定から変える
@@ -405,6 +406,25 @@ REPORT("report", "帳票", "PDF / Excel 出力", "file-earmark-arrow-up"),
 
 ---
 
+## テストコードを画面に表示する
+
+カテゴリ「テスト」のサンプルのように、`src/test/java` のテストコードを
+ソースコードタブに並べたいときは `.testSource(...)` を使います。
+テストクラスは本体のクラスパスに載っていないため、クラスリテラルではなく
+**完全修飾クラス名の文字列**で指定します。
+
+```java
+.source(OrderPricing.class)                                              // テスト対象
+.testSource("com.example.servletsample.samples.test.OrderPricingTest")   // そのテスト
+```
+
+`src/test/java` は `pom.xml` の `maven-war-plugin` で
+`WEB-INF/sources/test` へコピーしています（クラスファイルは同梱しません）。
+綴りを間違えると画面に出ないだけで気付きにくいので、`mvn test` が
+ファイルの実在を検査しています。
+
+---
+
 ## 確認
 
 ```bash
@@ -417,4 +437,5 @@ docker compose up -d --build    # 起動して画面を確認
 - サンプル ID / URL が重複していないか
 - 公開中のサンプルに対応する JSP が実在するか
 - 表示するソースが 1 件以上あるか
+- **登録したソースファイルが実在するか**（`SourceFile.test(...)` の綴り間違いもここで分かります）
 - 準備中のサンプルが検索結果に出ていないか
