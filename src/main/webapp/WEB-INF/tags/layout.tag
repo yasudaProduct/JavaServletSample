@@ -11,6 +11,7 @@
 <%@ attribute name="description" type="java.lang.String" %>
 <%@ attribute name="activeCategory" type="java.lang.String" %>
 <%@ attribute name="activeNav" type="java.lang.String" %>
+<%@ attribute name="activeTopicGroup" type="java.lang.String" %>
 <%@ attribute name="breadcrumb" fragment="true" %>
 <%@ attribute name="head" fragment="true" %>
 <%@ attribute name="scripts" fragment="true" %>
@@ -71,6 +72,9 @@
               </c:forEach>
             </div>
           </li>
+          <li class="nav-item ${activeNav eq 'topics' ? 'active' : ''}">
+            <a class="nav-link" href="${ctx}/topics">座学メモ</a>
+          </li>
           <li class="nav-item ${activeNav eq 'about' ? 'active' : ''}">
             <a class="nav-link" href="${ctx}/about">このサイトについて</a>
           </li>
@@ -101,7 +105,7 @@
 
       <%-- サイドバー (カテゴリ一覧) --%>
       <aside class="col-lg-3 col-xl-2 d-none d-lg-block site-sidebar">
-        <nav class="site-sidebar__inner" aria-label="カテゴリ">
+        <nav class="site-sidebar__inner" aria-label="カテゴリと座学メモ">
           <p class="site-sidebar__title">カテゴリ</p>
           <ul class="site-sidebar__list">
             <c:forEach var="category" items="${catalog.categories}">
@@ -133,8 +137,40 @@
             </c:forEach>
           </ul>
 
+          <p class="site-sidebar__title site-sidebar__title--second">座学メモ</p>
+          <ul class="site-sidebar__list">
+            <c:forEach var="group" items="${topics.groups}">
+              <c:set var="isActiveGroup" value="${activeTopicGroup eq group.id}" />
+              <li>
+                <a class="site-sidebar__link ${isActiveGroup ? 'is-active' : ''}"
+                   href="${ctx}/topics#${group.id}">
+                  <t:icon name="${group.icon}" cssClass="site-sidebar__icon" />
+                  <span class="site-sidebar__label">${group.label}</span>
+                  <span class="site-sidebar__count">${topics.count(group)}</span>
+                </a>
+                <c:if test="${isActiveGroup and topics.count(group) > 0}">
+                  <ul class="site-sidebar__sublist">
+                    <c:forEach var="item" items="${topics.byGroup(group)}">
+                      <li>
+                        <c:choose>
+                          <c:when test="${item.visitable}">
+                            <a class="site-sidebar__sublink" href="${ctx}${item.path}">${fn:escapeXml(item.title)}</a>
+                          </c:when>
+                          <c:otherwise>
+                            <span class="site-sidebar__sublink is-disabled">${fn:escapeXml(item.title)}</span>
+                          </c:otherwise>
+                        </c:choose>
+                      </li>
+                    </c:forEach>
+                  </ul>
+                </c:if>
+              </li>
+            </c:forEach>
+          </ul>
+
           <p class="site-sidebar__note">
-            公開中のサンプル <strong>${catalog.totalCount}</strong> 件
+            公開中のサンプル <strong>${catalog.totalCount}</strong> 件 /
+            座学メモ <strong>${topics.totalCount}</strong> 件
           </p>
         </nav>
       </aside>
@@ -176,6 +212,7 @@
       <div class="col-md-3 mb-3">
         <p class="site-footer__title">リンク</p>
         <ul class="site-footer__list">
+          <li><a href="${ctx}/topics">座学メモ</a></li>
           <li><a href="${ctx}/about">このサイトについて</a></li>
           <li>
             <a href="${initParam.githubUrl}" target="_blank" rel="noopener noreferrer">

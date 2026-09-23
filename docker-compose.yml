@@ -24,6 +24,7 @@ services:
       # ソースコード表示用 (画面に出しているコードを常に最新にする)
       - ./src/main/java:/usr/local/tomcat/webapps/ROOT/WEB-INF/sources/java:ro
       - ./shared/src/main/java:/usr/local/tomcat/webapps/ROOT/WEB-INF/sources/shared:ro
+      - ./src/test/java:/usr/local/tomcat/webapps/ROOT/WEB-INF/sources/test:ro
     environment:
       TZ: Asia/Tokyo
     healthcheck:

@@ -23,6 +23,9 @@ import org.junit.jupiter.api.Test;
  */
 class SampleCatalogTest {
 
+    /** ビルドで {@code src/main/resources} が配られる先。 */
+    private static final String CLASSES_ROOT = "/WEB-INF/classes";
+
     private final SampleCatalog catalog = SampleCatalog.getInstance();
 
     @Test
@@ -65,51 +68,6 @@ class SampleCatalogTest {
         }
     }
 
-    /**
-     * WAR の中のパスから、リポジトリ上の実ファイルの場所を割り出す。
-     *
-     * <p>ビルド (pom.xml の {@code <webResources>} / build.xml の {@code explode})
-     * が「どこから WAR のどこへ入れるか」の裏返しです。
-     * ここが合っていないと、画面の「ソースコード」タブが空になります。</p>
-     */
-    private static Path repositoryPathOf(String warPath) {
-        String path = warPath.substring(1);
-        if (path.startsWith("WEB-INF/sources/java/")) {
-            return Paths.get("src", "main", "java")
-                    .resolve(path.substring("WEB-INF/sources/java/".length()));
-        }
-        if (path.startsWith("WEB-INF/sources/shared/")) {
-            return Paths.get("shared", "src", "main", "java")
-                    .resolve(path.substring("WEB-INF/sources/shared/".length()));
-        }
-        if (path.startsWith("WEB-INF/sources/build/")) {
-            // ビルド設定そのもの。リポジトリのルート付近に散っている
-            String name = path.substring("WEB-INF/sources/build/".length());
-            if (name.equals("org.eclipse.wst.common.component")) {
-                return Paths.get(".settings", name);
-            }
-            return Paths.get(name);
-        }
-        if (path.startsWith("WEB-INF/classes/")) {
-            return Paths.get("src", "main", "resources")
-                    .resolve(path.substring("WEB-INF/classes/".length()));
-        }
-        return Paths.get("src", "main", "webapp").resolve(path);
-    }
-
-    @Test
-    @DisplayName("登録したソースファイルがすべて実在する")
-    void sourceFilesExist() {
-        for (Sample sample : catalog.getVisitableSamples()) {
-            for (SourceFile source : sample.getSources()) {
-                Path actual = repositoryPathOf(source.getPath());
-                assertTrue(Files.exists(actual),
-                        "ソースが見つかりません: " + sample.getId()
-                                + " / " + source.getPath() + " → " + actual);
-            }
-        }
-    }
-
     @Test
     @DisplayName("ビルド設定のソースは、Docker が COPY するものだけを参照している")
     void buildConfigSourcesAreCopiedByDocker() throws Exception {
@@ -120,10 +78,10 @@ class SampleCatalogTest {
 
         for (Sample sample : catalog.getVisitableSamples()) {
             for (SourceFile source : sample.getSources()) {
-                if (!source.getPath().startsWith("/WEB-INF/sources/build/")) {
+                if (!source.getPath().startsWith(SourceFile.BUILD_ROOT)) {
                     continue;
                 }
-                Path repoPath = repositoryPathOf(source.getPath());
+                Path repoPath = toLocalPath(source);
                 // COPY 行に、そのファイル自身かその親フォルダが出てくること
                 String fileName = repoPath.getFileName().toString();
                 Path parent = repoPath.getParent();
@@ -136,6 +94,54 @@ class SampleCatalogTest {
                                 + "（pom.xml の <webResources> が参照しているので必要です）");
             }
         }
+    }
+
+    @Test
+    @DisplayName("登録したソースファイルが実際に存在する")
+    void sourceFilesExist() {
+        for (Sample sample : catalog.getVisitableSamples()) {
+            for (SourceFile source : sample.getSources()) {
+                assertTrue(Files.exists(toLocalPath(source)),
+                        sample.getId() + " のソースが見つかりません: " + source.getPath());
+            }
+        }
+    }
+
+    /**
+     * ServletContext 上のパスを、リポジトリ内のファイルの場所に読み替える。
+     *
+     * <p>Java とテストコードは WAR にコピーして配っている (pom.xml の maven-war-plugin) ため、
+     * 配置先と置き場所が違います。</p>
+     */
+    private static Path toLocalPath(SourceFile source) {
+        String path = source.getPath();
+        if (path.startsWith(SourceFile.JAVA_TEST_ROOT)) {
+            return Paths.get("src", "test", "java")
+                    .resolve(path.substring(SourceFile.JAVA_TEST_ROOT.length() + 1));
+        }
+        if (path.startsWith(SourceFile.JAVA_ROOT)) {
+            return Paths.get("src", "main", "java")
+                    .resolve(path.substring(SourceFile.JAVA_ROOT.length() + 1));
+        }
+        if (path.startsWith(SourceFile.SHARED_ROOT)) {
+            // 共通ライブラリは別プロジェクト
+            return Paths.get("shared", "src", "main", "java")
+                    .resolve(path.substring(SourceFile.SHARED_ROOT.length() + 1));
+        }
+        if (path.startsWith(SourceFile.BUILD_ROOT)) {
+            // ビルド設定そのもの。リポジトリのルート付近に散っている
+            String name = path.substring(SourceFile.BUILD_ROOT.length() + 1);
+            if (name.equals("org.eclipse.wst.common.component")) {
+                return Paths.get(".settings", name);
+            }
+            return Paths.get(name);
+        }
+        if (path.startsWith(CLASSES_ROOT)) {
+            // messages.properties などは src/main/resources から WEB-INF/classes へ配られる
+            return Paths.get("src", "main", "resources")
+                    .resolve(path.substring(CLASSES_ROOT.length() + 1));
+        }
+        return Paths.get("src", "main", "webapp").resolve(path.substring(1));
     }
 
     @Test

@@ -125,6 +125,18 @@
               </includes>
             </resource>
             <!--
+              テストのサンプル (カテゴリ「テスト」) では、テストコードそのものを
+              画面に表示します。src/test/java はビルド成果物に含まれないため、
+              ソース表示用に WAR へコピーしています (クラスは同梱しません)。
+            -->
+            <resource>
+              <directory>src/test/java</directory>
+              <targetPath>WEB-INF/sources/test</targetPath>
+              <includes>
+                <include>**/*.java</include>
+              </includes>
+            </resource>
+            <!--
               ビルド設定そのもの。「共通処理を JAR に切り出す」サンプルで、
               Eclipse / Ant / Maven の 3 つが同じことをどう書いているかを画面に並べます。
               (build.xml の explode ターゲット ⑤ と同じ内容)

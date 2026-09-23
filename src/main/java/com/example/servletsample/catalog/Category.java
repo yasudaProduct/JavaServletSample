@@ -22,7 +22,8 @@ public enum Category {
     AJAX("ajax", "非同期通信", "Ajax、JSON API との連携", "arrow-repeat"),
     SHARED("shared", "複数サーバー・共通化",
             "サーバーを分けたときの共通処理の切り出し方とビルド", "diagram-3"),
-    ADVANCED("advanced", "応用・その他", "フィルタ、エラー処理、国際化など", "gear");
+    ADVANCED("advanced", "応用・その他", "フィルタ、エラー処理、国際化など", "gear"),
+    TESTING("test", "テスト", "JUnit 5 で単体テストを書く（計算・サービス・Servlet）", "check-circle");
 
     private final String id;
     private final String label;

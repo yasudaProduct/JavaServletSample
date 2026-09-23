@@ -120,6 +120,19 @@ import com.example.servletsample.samples.shared.SharedJarServlet;
 import com.example.servletsample.samples.shared.SharedSequenceDao;
 import com.example.servletsample.samples.shared.SharedStateServlet;
 import com.example.servletsample.samples.shared.SimulatedServer;
+import com.example.servletsample.samples.test.InMemoryOrderRepository;
+import com.example.servletsample.samples.test.JdbcOrderRepository;
+import com.example.servletsample.samples.test.MemberRank;
+import com.example.servletsample.samples.test.OrderAmount;
+import com.example.servletsample.samples.test.OrderForm;
+import com.example.servletsample.samples.test.OrderPricing;
+import com.example.servletsample.samples.test.OrderRepository;
+import com.example.servletsample.samples.test.OrderRequest;
+import com.example.servletsample.samples.test.OrderResult;
+import com.example.servletsample.samples.test.OrderService;
+import com.example.servletsample.samples.test.OrderServlet;
+import com.example.servletsample.samples.test.PricingDemoServlet;
+import com.example.servletsample.samples.test.TestDoubleDemoServlet;
 import com.example.servletsample.shared.ClassOrigin;
 import com.example.servletsample.shared.CodeFormatter;
 import com.example.servletsample.shared.CodeResolver;
@@ -791,6 +804,60 @@ final class SampleDefinitions {
                 .source(SourceFile.shared(SequenceCounter.class))
                 .source(SimulatedServer.class)
                 .source(SharedSequenceDao.class)
+                .build());
+
+        // ------------------------------------------------------------------
+        // テスト
+        // ------------------------------------------------------------------
+
+        samples.add(Sample.builder("unit-test-basics", Category.TESTING)
+                .title("単体テストの基本（JUnit 5・境界値）")
+                .summary("注文金額の計算を題材に、JUnit 5 でテストを書く。"
+                        + "準備・実行・検証の 3 段組み、ルールが切り替わる境界値の選び方、"
+                        + "表で一気に試す @ParameterizedTest、例外を確かめる assertThrows まで。")
+                .tags("テスト", "単体テスト", "JUnit", "JUnit 5", "境界値", "ParameterizedTest",
+                        "CsvSource", "assertThrows", "AAA", "Nested")
+                .source(OrderPricing.class)
+                .testSource("com.example.servletsample.samples.test.OrderPricingTest")
+                .source(OrderAmount.class)
+                .source(MemberRank.class)
+                .source(PricingDemoServlet.class)
+                .source(SourceFile.jsp("/WEB-INF/views/samples/test/unit-test-basics.jsp"))
+                .build());
+
+        samples.add(Sample.builder("test-double", Category.TESTING)
+                .title("テストダブルでデータベースから切り離す")
+                .summary("在庫を見て注文を登録するサービス層のテスト。"
+                        + "リポジトリをインターフェースにして偽物に差し替え、時計を止めて受注番号を固定する。"
+                        + "スタブ・フェイク・スパイ・モックの違いと、"
+                        + "「保存していないこと」の確かめ方まで。")
+                .tags("テスト", "単体テスト", "テストダブル", "スタブ", "フェイク", "スパイ", "モック",
+                        "依存性の注入", "DI", "Clock", "JUnit")
+                .source(OrderService.class)
+                .testSource("com.example.servletsample.samples.test.OrderServiceTest")
+                .source(OrderRepository.class)
+                .source(InMemoryOrderRepository.class)
+                .source(JdbcOrderRepository.class)
+                .source(OrderRequest.class)
+                .source(OrderResult.class)
+                .source(TestDoubleDemoServlet.class)
+                .source(SourceFile.jsp("/WEB-INF/views/samples/test/test-double.jsp"))
+                .build());
+
+        samples.add(Sample.builder("servlet-test", Category.TESTING)
+                .title("Servlet を単体テストする")
+                .summary("Tomcat を起動せずに doGet / doPost を直接呼ぶ。"
+                        + "偽の HttpServletRequest / HttpServletResponse を用意し、"
+                        + "forward 先・リダイレクト先・画面に渡した値を検証する。"
+                        + "テストしやすい Servlet の形も合わせて。")
+                .tags("テスト", "単体テスト", "Servlet", "doPost", "forward", "リダイレクト", "PRG",
+                        "モック", "HttpServletRequest", "JUnit")
+                .source(OrderServlet.class)
+                .testSource("com.example.servletsample.samples.test.OrderServletTest")
+                .testSource("com.example.servletsample.samples.test.FakeHttpServletRequest")
+                .testSource("com.example.servletsample.samples.test.FakeHttpServletResponse")
+                .source(OrderForm.class)
+                .source(SourceFile.jsp("/WEB-INF/views/samples/test/servlet-test.jsp"))
                 .build());
 
         // ------------------------------------------------------------------

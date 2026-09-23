@@ -9,12 +9,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.example.servletsample.catalog.Sample;
+import com.example.servletsample.catalog.Topic;
 import com.example.servletsample.common.BaseServlet;
 
 /**
  * サンプルのキーワード検索。
  *
- * <p>{@code /search?q=フォーム} のように GET パラメータを受け取ります。</p>
+ * <p>{@code /search?q=フォーム} のように GET パラメータを受け取ります。
+ * サンプルと座学メモの両方を対象にし、それぞれ別の一覧として画面へ渡します。</p>
  */
 @WebServlet(name = "search", urlPatterns = {"/search"})
 public class SearchServlet extends BaseServlet {
@@ -27,9 +29,11 @@ public class SearchServlet extends BaseServlet {
 
         String keyword = request.getParameter("q");
         List<Sample> results = catalog().search(keyword);
+        List<Topic> topicResults = topics().search(keyword);
 
         request.setAttribute("keyword", keyword == null ? "" : keyword.trim());
         request.setAttribute("results", results);
+        request.setAttribute("topicResults", topicResults);
         render(request, response, "search");
     }
 }

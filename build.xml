@@ -208,6 +208,15 @@
     </copy>
 
     <!--
+      テストのサンプル (カテゴリ「テスト」) は、テストコードそのものを画面に表示します。
+      src/test/java はビルド成果物に含まれないので、ソース表示用にコピーします
+      (クラスは同梱しません)。
+    -->
+    <copy todir="${war.dir}/WEB-INF/sources/test">
+      <fileset dir="${test.java.dir}" includes="**/*.java"/>
+    </copy>
+
+    <!--
       ⑤ ビルド設定そのもの。
       「共通処理を JAR に切り出す」サンプルで、Eclipse / Ant / Maven の 3 つが
       同じことをどう書いているかを画面に並べるために取り込みます。
@@ -261,6 +270,9 @@
     </copy>
     <copy todir="${webapp.dir}/WEB-INF/sources/shared">
       <fileset dir="${shared.dir}/src/main/java" includes="**/*.java"/>
+    </copy>
+    <copy todir="${webapp.dir}/WEB-INF/sources/test">
+      <fileset dir="${test.java.dir}" includes="**/*.java"/>
     </copy>
     <echo message="src/main/webapp/WEB-INF/sources/ にソースを配置しました。"/>
   </target>

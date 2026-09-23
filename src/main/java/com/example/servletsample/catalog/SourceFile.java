@@ -24,6 +24,18 @@ public final class SourceFile {
      */
     public static final String SHARED_ROOT = "/WEB-INF/sources/shared";
 
+    /** テストコード (src/test/java) を WAR に取り込んでいる場所。 */
+    public static final String JAVA_TEST_ROOT = "/WEB-INF/sources/test";
+
+    /**
+     * ビルド設定 (pom.xml / build.xml / Eclipse の設定) を取り込んでいる場所。
+     *
+     * <p>「共通処理を JAR に切り出す」のサンプルで、Eclipse / Ant / Maven の 3 つが
+     * 同じことをどう書いているかを画面に並べるために使います。
+     * リポジトリのルート付近に散っているファイルをここに集めています。</p>
+     */
+    public static final String BUILD_ROOT = "/WEB-INF/sources/build";
+
     private final String path;
     private final String label;
     private final String language;
@@ -58,6 +70,21 @@ public final class SourceFile {
             binaryName = binaryName.substring(0, nested);
         }
         String path = root + "/" + binaryName.replace('.', '/') + ".java";
+        return new SourceFile(path, null, "java");
+    }
+
+    /**
+     * テストコード (src/test/java) を完全修飾クラス名で指定する。
+     *
+     * <p>テストクラスは本体のクラスパスに載っていない (コンパイル対象が別) ため、
+     * {@link #of(Class)} のようにクラスリテラルでは書けません。文字列で指定しますが、
+     * 綴りを間違えると画面に出ないだけで気付きにくいので、
+     * {@code SampleCatalogTest} がファイルの実在を検査しています。</p>
+     *
+     * <pre>{@code SourceFile.test("com.example.servletsample.samples.test.OrderPricingTest")}</pre>
+     */
+    public static SourceFile test(String binaryName) {
+        String path = JAVA_TEST_ROOT + "/" + binaryName.replace('.', '/') + ".java";
         return new SourceFile(path, null, "java");
     }
 

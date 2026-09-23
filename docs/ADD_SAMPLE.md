@@ -10,6 +10,9 @@
 
 URL と JSP の場所は ID とカテゴリから自動的に決まります。
 
+> デモもソースコードも無い**読み物**を足したいときは
+> [座学メモ（読み物）を追加する](#座学メモ読み物を追加する) を参照してください。
+
 | | 決まり |
 | --- | --- |
 | URL | `/samples/{カテゴリID}/{サンプルID}` |
@@ -374,6 +377,7 @@ Sample.builder("sample-id", Category.LIST)
         .status(SampleStatus.PLANNED)          // 準備中（グレー表示・リンク無し）
         .tags("タグ1", "タグ2")                 // 検索対象になる
         .source(FooServlet.class)              // Java のソースを表示
+        .testSource("com.example...FooTest")   // テストコードを表示（完全修飾クラス名）
         .source(SourceFile.css("/WEB-INF/..."))// 任意のファイルを表示
         .path("/samples/list/custom-url")      // URL を既定から変える
         .viewPath("/WEB-INF/views/other.jsp")  // JSP の場所を既定から変える
@@ -392,6 +396,89 @@ Sample.builder("sample-id", Category.LIST)
 
 ---
 
+## 座学メモ（読み物）を追加する
+
+デモもソースコードも無い読み物です。
+「1 台の localhost では再現できない話」や「コードではなく判断の話」を置くところで、
+サンプルとは別のカタログ（`TopicDefinitions`）で管理しています。
+
+```
+1. JSP を作る          src/main/webapp/WEB-INF/views/topics/{ID}.jsp
+2. カタログに登録する    src/main/java/com/example/servletsample/catalog/TopicDefinitions.java
+```
+
+| | 決まり |
+| --- | --- |
+| URL | `/topics/{ID}` |
+| JSP | `/WEB-INF/views/topics/{ID}.jsp` |
+
+### 1. JSP を作る
+
+`src/main/webapp/WEB-INF/views/topics/connection-pool.jsp`
+
+```jsp
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<t:topic topicId="connection-pool">
+
+  <h2>見出し</h2>
+  <p>本文。<strong>強調</strong>や <code>コード</code> はそのまま使えます。</p>
+
+  <pre class="topic-figure">図やアスキーアートはこれで囲む
+  （等幅・枠付きで出ます）</pre>
+
+  <pre><code class="language-java">// コード片。class="language-xxx" を付けると色が付きます
+// (&lt; と &gt; はエスケープして書きます)
+try (Connection con = dataSource.getConnection()) { ... }</code></pre>
+
+  <div class="topic-callout">
+    <p class="topic-callout__title">覚えておくこと</p>
+    <ul class="mb-0"><li>まとめを書く</li></ul>
+  </div>
+
+  <div class="topic-callout topic-callout--warn">
+    <p class="topic-callout__title">注意（オレンジの囲み）</p>
+    <p class="mb-0">落とし穴はこちらで目立たせます。</p>
+  </div>
+
+</t:topic>
+```
+
+見出し・パンくず・タグ・関連サンプル・前後リンクは `WEB-INF/tags/topic.tag` が作ります。
+JSP に書くのは**本文だけ**です。表は解説タブと同じ `table table-sm table-bordered doc-table` が使えます。
+
+### 2. カタログに登録する
+
+`TopicDefinitions.define()` に 1 件足します。
+
+```java
+topics.add(Topic.builder("connection-pool", TopicGroup.MECHANISM)
+        .title("コネクションプールの話")
+        .summary("一覧とカードに出る 1 〜 2 行の説明。")
+        .readingMinutes(7)                     // 読了時間の目安（既定 5 分）
+        .tags("DB", "コネクションプール")        // 検索対象になる
+        .relatedSamples("transaction", "crud")  // 本文の下に出るサンプル（ID で指定）
+        .build());
+```
+
+`status(SampleStatus.PLANNED)` はサンプルと同じように使えます（グレー表示・リンク無し）。
+`relatedSamples` に書いた ID は `mvn test` で実在チェックされます。
+
+### グループを増やす
+
+`src/main/java/com/example/servletsample/catalog/TopicGroup.java` に 1 行足します。
+
+```java
+DATABASE("database", "データベース", "SQL とトランザクションの話", "table"),
+```
+
+引数は順に「アンカーに使う ID」「表示名」「説明」「アイコン名」です。
+定義順がそのまま一覧ページとサイドバーの並び順になります。
+
+---
+
 ## カテゴリを増やす
 
 `src/main/java/com/example/servletsample/catalog/Category.java` に 1 行足します。
@@ -402,6 +489,25 @@ REPORT("report", "帳票", "PDF / Excel 出力", "file-earmark-arrow-up"),
 
 引数は順に「URL に使う ID」「表示名」「説明」「アイコン名」です。
 定義順がそのままサイドバーとトップページの並び順になります。
+
+---
+
+## テストコードを画面に表示する
+
+カテゴリ「テスト」のサンプルのように、`src/test/java` のテストコードを
+ソースコードタブに並べたいときは `.testSource(...)` を使います。
+テストクラスは本体のクラスパスに載っていないため、クラスリテラルではなく
+**完全修飾クラス名の文字列**で指定します。
+
+```java
+.source(OrderPricing.class)                                              // テスト対象
+.testSource("com.example.servletsample.samples.test.OrderPricingTest")   // そのテスト
+```
+
+`src/test/java` は `pom.xml` の `maven-war-plugin` で
+`WEB-INF/sources/test` へコピーしています（クラスファイルは同梱しません）。
+綴りを間違えると画面に出ないだけで気付きにくいので、`mvn test` が
+ファイルの実在を検査しています。
 
 ---
 
@@ -417,4 +523,13 @@ docker compose up -d --build    # 起動して画面を確認
 - サンプル ID / URL が重複していないか
 - 公開中のサンプルに対応する JSP が実在するか
 - 表示するソースが 1 件以上あるか
+- **登録したソースファイルが実在するか**（`SourceFile.test(...)` の綴り間違いもここで分かります）
 - 準備中のサンプルが検索結果に出ていないか
+
+座学メモについても同じように検査しています。
+
+- メモの ID / URL が重複していないか
+- 公開中のメモに対応する JSP が実在するか
+- タイトル・説明・タグが空でないか
+- `relatedSamples` に書いたサンプル ID が実在するか
+- 前後リンクが一覧の並び順どおりか

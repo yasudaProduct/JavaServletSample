@@ -15,13 +15,15 @@ import com.example.servletsample.samples.file.StoredFileDao;
 import com.example.servletsample.samples.list.CustomerDao;
 import com.example.servletsample.samples.list.ProductDao;
 import com.example.servletsample.samples.shared.SharedSequenceDao;
+import com.example.servletsample.samples.test.JdbcOrderRepository;
 
 /**
  * アプリケーションの起動・停止に合わせて組み込みデータベースを準備するリスナー。
  *
  * <p>テーブルの作成そのものは、それぞれのサンプルの DAO
  * ({@link StoredFileDao} / {@link ProductDao} / {@link CustomerDao} /
- * {@link TransferDao} / {@link SharedSequenceDao}) が持っています。
+ * {@link TransferDao} / {@link SharedSequenceDao} /
+ * {@link JdbcOrderRepository}) が持っています。
  * ここではアプリの起動時にまとめて呼び出し、
  * 「最初の 1 人目のアクセスが遅くなる」「起動時に気付けない」を防いでいます。</p>
  */
@@ -37,6 +39,7 @@ public class DatabaseInitializer implements ServletContextListener {
             CustomerDao.prepareTable();
             TransferDao.prepareTable();
             SharedSequenceDao.prepareTable();
+            JdbcOrderRepository.prepareTable();
             context.log("組み込みデータベース (H2) を初期化しました");
         } catch (RuntimeException e) {
             context.log("組み込みデータベースの初期化に失敗しました", e);

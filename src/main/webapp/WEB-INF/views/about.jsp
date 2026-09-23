@@ -29,6 +29,14 @@
         <strong>解説</strong> の 3 つのタブで構成しています。
       </p>
 
+      <h2>座学メモ</h2>
+      <p>
+        サンプルにしにくい話 &mdash; 1 台の localhost では再現できないこと（サーバが 2 台になったとき、
+        同時に何百人が来たとき、本番だけ挙動が違うとき）や、コードではなく判断の話 &mdash; は、
+        読むだけの<strong><a href="${ctx}/topics">座学メモ</a></strong>としてまとめています。
+        各メモの最後には関連するサンプルへのリンクがあり、「読む → 触る」の順でたどれます。
+      </p>
+
       <h2>技術構成</h2>
       <div class="table-responsive">
         <table class="table table-sm table-bordered doc-table">
@@ -53,13 +61,13 @@
 
       <pre class="doc-tree">src/main/
 ├── java/com/example/servletsample/
-│   ├── catalog/   … サンプル一覧（目次）の定義
+│   ├── catalog/   … サンプル一覧・座学メモ（目次）の定義
 │   ├── common/    … 共通処理（土台となる Servlet など）
-│   ├── web/       … サイト自体の画面（トップ・カテゴリ・検索）
+│   ├── web/       … サイト自体の画面（トップ・カテゴリ・検索・座学メモ）
 │   └── samples/   … 各サンプルの Servlet
 └── webapp/
     ├── WEB-INF/
-    │   ├── views/  … 画面の JSP（samples/ の下がサンプル本体）
+    │   ├── views/  … 画面の JSP（samples/ がサンプル本体、topics/ が座学メモ）
     │   ├── tags/   … 共通レイアウトのタグファイル
     │   └── web.xml … アプリ全体の設定
     └── assets/     … CSS / JavaScript / Bootstrap</pre>
@@ -70,6 +78,11 @@
         <li><code>SampleDefinitions.define()</code> に 1 件追加する</li>
         <li>Servlet が必要なら <code>@WebServlet("/samples/{カテゴリ}/{ID}")</code> で作る</li>
       </ol>
+      <p>
+        座学メモも同じ形です。
+        <code>WEB-INF/views/topics/{ID}.jsp</code> に本文を書き、
+        <code>TopicDefinitions.define()</code> に 1 件追加します。
+      </p>
       <p>
         詳しい手順はリポジトリの <code>docs/ADD_SAMPLE.md</code> にまとめてあります。
       </p>
