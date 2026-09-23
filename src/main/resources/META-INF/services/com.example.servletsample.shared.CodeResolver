@@ -1,0 +1,12 @@
+# ServiceLoader の登録ファイル。
+#
+# ファイル名がインタフェースの完全修飾名で、中身が実装クラスの完全修飾名です。
+# 共通ライブラリ側はこのファイルの存在も、書かれているクラス名も知りません。
+#
+# 置き場所は src/main/resources/META-INF/services/ です。
+# src/main/java の下に置くと WEB-INF/classes にコピーされず、
+# 「実装が 0 件」になって原因が分かりにくい詰まり方をします。
+#
+# 行の順番が ResolverRegistry.forCode() の探索順になります。
+com.example.servletsample.samples.shared.EmployeeCodeResolver
+com.example.servletsample.samples.shared.ProductCodeResolver

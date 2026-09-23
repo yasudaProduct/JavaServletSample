@@ -2,14 +2,20 @@
 target/
 pom.xml.versionsBackup
 
+# ---- Ant / Eclipse のビルド出力 ----
+# build/ant/ … Ant の出力、build/classes … Eclipse の出力、dist/ … 完成した WAR
+build/
+dist/
+# ant sources-for-ide が置く .java のコピー (成果物なのでコミットしない)
+src/main/webapp/WEB-INF/sources/
+
 # ---- IDE ----
+# .project / .classpath / .settings は、Eclipse でそのまま開けるように
+# あえてコミットしています (docs/ECLIPSE.md を参照)。
 .idea/
 *.iml
 *.ipr
 *.iws
-.classpath
-.project
-.settings/
 bin/
 .factorypath
 

@@ -8,6 +8,21 @@ docs
 *.md
 !README.md
 
+# ---- Ant / Eclipse ----
+# Docker 側は Maven でビルドするため、ビルドに要らないものは送らない
+# (lib/ は約 6MB あるので、入れるとビルドコンテキストの転送が無駄に重くなる)
+lib
+build
+dist
+**/build
+**/.project
+
+# build.xml / .classpath / .settings は「あえて送っています」。
+# サンプル「共通処理を JAR に切り出す」のソースコードタブに実物を出すため、
+# pom.xml の <webResources> がこれらを WAR に取り込みます。
+# ここに書き足すと Docker ビルドが
+# 「basedir /build/.settings does not exist」で失敗します。
+
 # ---- Cloudflare / Node ----
 # Docker のビルドコンテキストに入れる必要が無いもの
 node_modules

@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ======================================================================
+   Ant のビルド定義（Maven を使わないルート）
+
+   Eclipse に同梱されている Ant だけでビルドできるようにしてあります。
+   Maven 側 (pom.xml) と成果物は同じで、どちらを使っても構いません。
+
+     ant                  … dist/ROOT.war を作る (= ant war)
+     ant shared-jar       … 共通ライブラリ (shared/) だけを JAR にする
+     ant shared-test      … 共通ライブラリだけをテストする
+     ant explode          … build/ant/ROOT に展開形式で組み立てる
+     ant test             … JUnit 5 のテストを実行する
+     ant sources-for-ide  … Eclipse から動かすとき用 (ソースコード表示の準備)
+     ant clean            … 出力を消す
+
+   Eclipse からは「実行 → Ant ビルド」、または build.xml を右クリックして
+   「実行 → Ant ビルド...」でターゲットを選べます。
+
+   依存ライブラリは lib/ 配下にコミット済みなので、ネットワークは不要です。
+     lib/provided/ … Tomcat が持っているもの。コンパイルにだけ使い、WAR に入れない
+     lib/runtime/  … WAR の WEB-INF/lib に入れるもの
+     lib/test/     … テスト実行にだけ使うもの
+  ======================================================================
+-->
+<project name="servlet-sample" default="war" basedir=".">
+
+  <!-- ==================================================================
+       設定値
+       ================================================================== -->
+
+  <!-- Tomcat の ROOT コンテキスト (http://localhost:8080/) で動かすため ROOT 固定 -->
+  <property name="app.name"        value="ROOT"/>
+
+  <!-- pom.xml の maven.compiler.release と合わせる -->
+  <property name="java.release"    value="17"/>
+  <property name="src.encoding"    value="UTF-8"/>
+
+  <property name="src.java.dir"    value="src/main/java"/>
+  <property name="src.res.dir"     value="src/main/resources"/>
+  <property name="webapp.dir"      value="src/main/webapp"/>
+  <property name="test.java.dir"   value="src/test/java"/>
+
+  <!--
+    共通ライブラリ (別プロジェクト)。
+    版はファイル名に入れます。WAR を開けば「どの版の共通処理で動いているか」が
+    分かるようにするためです (複数サーバー構成でいちばん大事なところ)。
+  -->
+  <property name="shared.dir"      value="shared"/>
+  <property name="shared.name"     value="servlet-sample-shared"/>
+  <property name="shared.version"  value="1.0.0"/>
+
+  <!--
+    出力先は build/ant/ 配下にまとめています。
+    Eclipse が使う build/classes とぶつからないよう、わざと分けてあります
+    (同じ場所に出すと、Eclipse の自動ビルドと Ant が互いの出力を消し合います)。
+  -->
+  <property name="out.dir"         value="build/ant"/>
+  <property name="classes.dir"     value="${out.dir}/classes"/>
+  <property name="test.classes.dir" value="${out.dir}/test-classes"/>
+  <property name="war.dir"         value="${out.dir}/${app.name}"/>
+  <property name="dist.dir"        value="dist"/>
+
+  <property name="shared.classes.dir" value="${out.dir}/shared-classes"/>
+  <property name="shared.test.classes.dir" value="${out.dir}/shared-test-classes"/>
+  <property name="shared.jar"      value="${out.dir}/${shared.name}-${shared.version}.jar"/>
+
+  <!-- ==================================================================
+       クラスパス
+
+       provided と runtime を分けているのが肝です。
+       servlet-api を WAR に入れてしまうと、Tomcat が持っているものと
+       二重になり、起動時に ClassCastException や
+       「offending class: javax/servlet/Servlet.class」で落ちます。
+       ================================================================== -->
+
+  <path id="classpath.compile">
+    <fileset dir="lib/provided" includes="*.jar"/>
+    <fileset dir="lib/runtime"  includes="*.jar"/>
+    <!-- 共通ライブラリ。shared-jar ターゲットがこのビルドの中で作る -->
+    <pathelement location="${shared.jar}"/>
+  </path>
+
+  <!--
+       共通ライブラリのテスト用クラスパス。
+       アプリ本体も Servlet API も入っていないのが要点です。
+       共通ライブラリは JDK 以外に依存しないので、これだけでテストが回ります。
+       ================================================================== -->
+  <path id="classpath.shared.test">
+    <pathelement location="${shared.classes.dir}"/>
+    <pathelement location="${shared.test.classes.dir}"/>
+    <fileset dir="lib/test" includes="*.jar"/>
+  </path>
+
+  <path id="classpath.test">
+    <pathelement location="${classes.dir}"/>
+    <pathelement location="${test.classes.dir}"/>
+    <path refid="classpath.compile"/>
+    <fileset dir="lib/test" includes="*.jar"/>
+  </path>
+
+  <!-- ==================================================================
+       clean
+       ================================================================== -->
+  <target name="clean" description="ビルド出力を消す">
+    <delete dir="build"/>
+    <delete dir="${dist.dir}"/>
+    <!-- sources-for-ide が置いたコピーも片付ける -->
+    <delete dir="${webapp.dir}/WEB-INF/sources"/>
+  </target>
+
+  <!-- ==================================================================
+       shared-jar : 共通ライブラリ (別プロジェクト) を JAR にする
+
+       Maven だと「先に shared を install してからアプリをビルド」という
+       2 段階になりますが、Ant は 1 つのビルドの中で順番に作れます。
+
+       ここで作られる JAR は、explode ターゲットで WAR の WEB-INF/lib に入ります。
+       Tomcat の共有 lib ($CATALINA_BASE/lib) には置きません。
+       共有 lib に置くと WAR を戻しても版が戻らず、
+       どの組み合わせで動いているのか追えなくなります。
+       ================================================================== -->
+  <target name="shared-jar" description="共通ライブラリを JAR にする">
+    <mkdir dir="${shared.classes.dir}"/>
+    <javac srcdir="${shared.dir}/src/main/java"
+           destdir="${shared.classes.dir}"
+           release="${java.release}"
+           encoding="${src.encoding}"
+           includeantruntime="false"
+           debug="true"
+           deprecation="true">
+      <!--
+        classpath を一切与えていません。
+        共通ライブラリは JDK 以外に依存しないのが約束です。
+        servlet-api を足したくなったら、それは Web アプリ側に置くべき処理です。
+      -->
+      <compilerarg value="-Xlint:all,-serial"/>
+    </javac>
+    <jar destfile="${shared.jar}" basedir="${shared.classes.dir}">
+      <manifest>
+        <attribute name="Implementation-Title" value="${shared.name}"/>
+        <attribute name="Implementation-Version" value="${shared.version}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <!-- ==================================================================
+       compile : src/main/java → build/ant/classes
+       ================================================================== -->
+  <target name="compile" depends="shared-jar" description="本体をコンパイルする">
+    <mkdir dir="${classes.dir}"/>
+    <javac srcdir="${src.java.dir}"
+           destdir="${classes.dir}"
+           release="${java.release}"
+           encoding="${src.encoding}"
+           includeantruntime="false"
+           debug="true"
+           deprecation="true">
+      <classpath refid="classpath.compile"/>
+      <!-- 日本語のソースなので、警告は出させておく -->
+      <compilerarg value="-Xlint:all,-serial"/>
+    </javac>
+
+    <!-- messages*.properties を WEB-INF/classes に入れる (国際化のサンプルが使う) -->
+    <copy todir="${classes.dir}">
+      <fileset dir="${src.res.dir}"/>
+    </copy>
+  </target>
+
+  <!-- ==================================================================
+       explode : Tomcat の webapps に置ける展開形式を組み立てる
+
+       ここで作った build/ant/ROOT をそのまま Tomcat の webapps/ に置けば
+       動きます (WAR に固めなくても配備できます)。
+       ================================================================== -->
+  <target name="explode" depends="compile" description="展開形式 (build/ant/ROOT) を組み立てる">
+    <mkdir dir="${war.dir}"/>
+
+    <!-- ① 画面まわり一式 (WEB-INF/web.xml, views, tags, tlds, assets, META-INF/context.xml) -->
+    <copy todir="${war.dir}">
+      <fileset dir="${webapp.dir}"/>
+    </copy>
+
+    <!-- ② コンパイル済みクラスと設定ファイル -->
+    <copy todir="${war.dir}/WEB-INF/classes">
+      <fileset dir="${classes.dir}"/>
+    </copy>
+
+    <!-- ③ 実行時に必要な jar (JSTL / H2) と、自分でビルドした共通ライブラリ -->
+    <copy todir="${war.dir}/WEB-INF/lib">
+      <fileset dir="lib/runtime" includes="*.jar"/>
+      <fileset file="${shared.jar}"/>
+    </copy>
+
+    <!--
+      ④ Java のソースファイルそのもの。
+      このサイトは「動いている画面」と「そのソースコード」を並べて見せるため、
+      .java を WEB-INF/sources/java に入れて実行時に読んでいます
+      (SourceLoader が読む場所。pom.xml の webResources と同じ役割)。
+      WEB-INF 配下なのでブラウザから直接ダウンロードはされません。
+    -->
+    <copy todir="${war.dir}/WEB-INF/sources/java">
+      <fileset dir="${src.java.dir}" includes="**/*.java"/>
+    </copy>
+    <!-- 共通ライブラリのソースは別プロジェクトなので別の場所に置く -->
+    <copy todir="${war.dir}/WEB-INF/sources/shared">
+      <fileset dir="${shared.dir}/src/main/java" includes="**/*.java"/>
+    </copy>
+
+    <!--
+      テストのサンプル (カテゴリ「テスト」) は、テストコードそのものを画面に表示します。
+      src/test/java はビルド成果物に含まれないので、ソース表示用にコピーします
+      (クラスは同梱しません)。
+    -->
+    <copy todir="${war.dir}/WEB-INF/sources/test">
+      <fileset dir="${test.java.dir}" includes="**/*.java"/>
+    </copy>
+
+    <!--
+      ⑤ ビルド設定そのもの。
+      「共通処理を JAR に切り出す」サンプルで、Eclipse / Ant / Maven の 3 つが
+      同じことをどう書いているかを画面に並べるために取り込みます。
+      (pom.xml の webResources も同じ場所に入れています)
+    -->
+    <copy todir="${war.dir}/WEB-INF/sources/build">
+      <fileset file="pom.xml"/>
+      <fileset file="build.xml"/>
+      <fileset file=".classpath"/>
+      <fileset file=".settings/org.eclipse.wst.common.component"/>
+    </copy>
+    <copy todir="${war.dir}/WEB-INF/sources/build/shared">
+      <fileset file="${shared.dir}/pom.xml"/>
+    </copy>
+  </target>
+
+  <!-- ==================================================================
+       war : dist/ROOT.war を作る
+       ================================================================== -->
+  <target name="war" depends="explode" description="dist/ROOT.war を作る">
+    <mkdir dir="${dist.dir}"/>
+    <!--
+      web.xml は explode で既に build/ant/ROOT/WEB-INF/ に入っているため、
+      webxml 属性は使わず needxmlfile="false" にしています
+      (両方指定すると web.xml が二重になります)。
+    -->
+    <war destfile="${dist.dir}/${app.name}.war"
+         basedir="${war.dir}"
+         needxmlfile="false"/>
+    <echo message="できました: ${dist.dir}/${app.name}.war"/>
+  </target>
+
+  <!-- ==================================================================
+       sources-for-ide : Eclipse の「サーバーで実行」用の下ごしらえ
+
+       Eclipse から動かすときは Ant を通らないので、explode の④
+       (.java を WEB-INF/sources/java に入れる処理) が実行されません。
+       その状態でも画面は動きますが、「ソースコード」タブが空になります。
+
+       そこで、デプロイメント・アセンブリーで既にルートに割り当てられている
+       src/main/webapp の下に .java をコピーしておきます。こうすると
+       Eclipse も Maven も追加設定なしでそのまま拾います。
+
+       コピー先は .gitignore 済みなので、コミットされることはありません。
+       毎回自動で走らせたい場合は docs/ECLIPSE.md の
+       「Ant ビルダーとして登録する」を参照してください。
+       ================================================================== -->
+  <target name="sources-for-ide" description="Eclipse 用にソースコード表示を準備する">
+    <copy todir="${webapp.dir}/WEB-INF/sources/java">
+      <fileset dir="${src.java.dir}" includes="**/*.java"/>
+    </copy>
+    <copy todir="${webapp.dir}/WEB-INF/sources/shared">
+      <fileset dir="${shared.dir}/src/main/java" includes="**/*.java"/>
+    </copy>
+    <copy todir="${webapp.dir}/WEB-INF/sources/test">
+      <fileset dir="${test.java.dir}" includes="**/*.java"/>
+    </copy>
+    <echo message="src/main/webapp/WEB-INF/sources/ にソースを配置しました。"/>
+  </target>
+
+  <!-- ==================================================================
+       shared-test : 共通ライブラリだけをテストする
+
+       Tomcat もデータベースもアプリ本体も要りません。
+       共通ライブラリが JDK 以外に依存していないことの裏返しです。
+       ================================================================== -->
+  <target name="shared-test" depends="shared-jar" description="共通ライブラリのテストを実行する">
+    <mkdir dir="${shared.test.classes.dir}"/>
+    <javac srcdir="${shared.dir}/src/test/java"
+           destdir="${shared.test.classes.dir}"
+           release="${java.release}"
+           encoding="${src.encoding}"
+           includeantruntime="false"
+           debug="true">
+      <classpath refid="classpath.shared.test"/>
+    </javac>
+    <java classname="org.junit.platform.console.ConsoleLauncher"
+          fork="true"
+          failonerror="true">
+      <classpath refid="classpath.shared.test"/>
+      <jvmarg value="-Dfile.encoding=UTF-8"/>
+      <arg value="execute"/>
+      <arg value="--scan-class-path=${shared.test.classes.dir}"/>
+      <arg value="--details=summary"/>
+      <arg value="--fail-if-no-tests"/>
+      <arg value="--disable-ansi-colors"/>
+    </java>
+  </target>
+
+  <!-- ==================================================================
+       test : JUnit 5 を実行する
+
+       Ant の &lt;junit&gt; タスクは JUnit 4 用なので使えません。
+       JUnit 5 が配っている「コンソールランチャー」(1 つの jar に全部入り) を
+       &lt;java&gt; で叩くのが、依存関係が増えず一番素直です。
+       ================================================================== -->
+  <target name="test-compile" depends="compile">
+    <mkdir dir="${test.classes.dir}"/>
+    <javac srcdir="${test.java.dir}"
+           destdir="${test.classes.dir}"
+           release="${java.release}"
+           encoding="${src.encoding}"
+           includeantruntime="false"
+           debug="true">
+      <classpath refid="classpath.test"/>
+    </javac>
+  </target>
+
+  <target name="test" depends="shared-test,test-compile" description="JUnit 5 のテストを実行する (共通ライブラリ + アプリ)">
+    <java classname="org.junit.platform.console.ConsoleLauncher"
+          fork="true"
+          failonerror="true">
+      <classpath refid="classpath.test"/>
+      <jvmarg value="-Dfile.encoding=UTF-8"/>
+      <arg value="execute"/>
+      <arg value="--scan-class-path=${test.classes.dir}"/>
+      <arg value="--details=summary"/>
+      <!-- テストが 1 件も見つからない状態を「成功」にしないための保険 -->
+      <arg value="--fail-if-no-tests"/>
+      <arg value="--disable-ansi-colors"/>
+    </java>
+  </target>
+
+  <!-- ==================================================================
+       all : テストを通してから WAR を作る (リリース用)
+       ================================================================== -->
+  <target name="all" depends="clean,test,war" description="clean → test → war"/>
+
+</project>

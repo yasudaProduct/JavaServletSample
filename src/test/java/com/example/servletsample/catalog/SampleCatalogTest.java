@@ -69,6 +69,34 @@ class SampleCatalogTest {
     }
 
     @Test
+    @DisplayName("ビルド設定のソースは、Docker が COPY するものだけを参照している")
+    void buildConfigSourcesAreCopiedByDocker() throws Exception {
+        // pom.xml の <webResources> が参照するファイルを Dockerfile が COPY していないと、
+        // Docker ビルドが「basedir ... does not exist」で失敗します。
+        // ローカルには全部あるので mvn verify では気付けないため、ここで見張ります。
+        String dockerfile = Files.readString(Paths.get("docker", "tomcat", "Dockerfile"));
+
+        for (Sample sample : catalog.getVisitableSamples()) {
+            for (SourceFile source : sample.getSources()) {
+                if (!source.getPath().startsWith(SourceFile.BUILD_ROOT)) {
+                    continue;
+                }
+                Path repoPath = toLocalPath(source);
+                // COPY 行に、そのファイル自身かその親フォルダが出てくること
+                String fileName = repoPath.getFileName().toString();
+                Path parent = repoPath.getParent();
+                boolean copied = dockerfile.contains("COPY " + repoPath)
+                        || dockerfile.contains(" " + fileName + " ")
+                        || dockerfile.contains("COPY " + fileName + " ")
+                        || (parent != null && dockerfile.contains("COPY " + parent + " "));
+                assertTrue(copied,
+                        "docker/tomcat/Dockerfile が COPY していません: " + repoPath
+                                + "（pom.xml の <webResources> が参照しているので必要です）");
+            }
+        }
+    }
+
+    @Test
     @DisplayName("登録したソースファイルが実際に存在する")
     void sourceFilesExist() {
         for (Sample sample : catalog.getVisitableSamples()) {
@@ -94,6 +122,19 @@ class SampleCatalogTest {
         if (path.startsWith(SourceFile.JAVA_ROOT)) {
             return Paths.get("src", "main", "java")
                     .resolve(path.substring(SourceFile.JAVA_ROOT.length() + 1));
+        }
+        if (path.startsWith(SourceFile.SHARED_ROOT)) {
+            // 共通ライブラリは別プロジェクト
+            return Paths.get("shared", "src", "main", "java")
+                    .resolve(path.substring(SourceFile.SHARED_ROOT.length() + 1));
+        }
+        if (path.startsWith(SourceFile.BUILD_ROOT)) {
+            // ビルド設定そのもの。リポジトリのルート付近に散っている
+            String name = path.substring(SourceFile.BUILD_ROOT.length() + 1);
+            if (name.equals("org.eclipse.wst.common.component")) {
+                return Paths.get(".settings", name);
+            }
+            return Paths.get(name);
         }
         if (path.startsWith(CLASSES_ROOT)) {
             // messages.properties などは src/main/resources から WEB-INF/classes へ配られる

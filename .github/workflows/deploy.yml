@@ -43,6 +43,10 @@ jobs:
           java-version: '17'
           cache: maven
 
+      - name: 共通ライブラリ (shared) を先にビルドする
+        # アプリ側がこれに依存しているため、先にローカルリポジトリへ入れる
+        run: mvn -B --no-transfer-progress -f shared/pom.xml install
+
       - name: Maven でビルドとテストを行う
         run: mvn -B --no-transfer-progress verify
 

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Eclipse のビルド・パス (= コンパイルに使うもの)。
+
+  ここは「コンパイルが通るか」だけを決める場所です。
+  「WAR に何が入るか」は .settings/org.eclipse.wst.common.component
+  (デプロイメント・アセンブリー) が決めます。
+  片方だけ設定して実行時に NoClassDefFoundError になるのが定番の詰まりどころなので、
+  両方セットで用意してあります。
+
+  出力先を build/classes にしているのは Ant の出力 (build/ant/) と
+  ぶつからないようにするためです。
+-->
+<classpath>
+	<!-- 本体のソース。コンパイル結果は build/classes へ -->
+	<classpathentry kind="src" output="build/classes" path="src/main/java"/>
+
+	<!-- messages*.properties。クラスと同じ場所に置く必要があるため出力先も同じ -->
+	<classpathentry kind="src" output="build/classes" path="src/main/resources"/>
+
+	<!-- テストのソース。WAR には入れないので出力先を分ける -->
+	<classpathentry kind="src" output="build/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+
+	<!--
+		共通ライブラリ (別プロジェクト) への参照。
+		ワークスペースに shared/ も一緒にインポートしておく必要があります。
+
+		これは「コンパイルが通るように」するための参照です。
+		WAR の WEB-INF/lib に JAR として入れるほうは
+		.settings/org.eclipse.wst.common.component の dependent-module が担当します。
+		両方セットで必要で、片方だけだと実行時に NoClassDefFoundError になります。
+	-->
+	<classpathentry combineaccessrules="false" kind="src" path="/servlet-sample-shared"/>
+
+	<!-- JDK 17 以上 (pom.xml / build.xml の release=17 に合わせる) -->
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
+
+	<!-- WEB-INF/lib に置いた jar を自動で拾うコンテナ (このリポジトリでは空。lib/runtime を使う) -->
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+
+	<!-- JUnit 5。Eclipse 同梱のものを使うので jar をコミットしていない -->
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+
+	<!--
+		Tomcat が持っているもの。コンパイルにだけ使い、WAR には入れない。
+		Eclipse に Tomcat を「ターゲット・ランタイム」として登録した場合は、
+		同じクラスが二重になるのでこの 2 行を消してください。
+	-->
+	<classpathentry kind="lib" path="lib/provided/javax.servlet-api-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/provided/javax.servlet.jsp-api-2.3.3.jar"/>
+
+	<!-- WAR の WEB-INF/lib に入るもの (デプロイメント・アセンブリーで割り当て済み) -->
+	<classpathentry kind="lib" path="lib/runtime/jstl-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/h2-2.2.224.jar"/>
+
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>

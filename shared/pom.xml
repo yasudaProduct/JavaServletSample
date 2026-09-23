@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ======================================================================
+   共通ライブラリ (servlet-sample-shared)
+
+   複数のアプリから使う「状態を持たない処理」を入れる、独立したプロジェクトです。
+   Web アプリ側 (ルートの pom.xml) がこれに依存し、
+   ビルドすると WAR の WEB-INF/lib に JAR として同梱されます。
+
+   ルートの pom.xml とは親子関係にしていません。
+   「共通ライブラリは別プロジェクトとして先にリリースし、
+     アプリはその版を参照する」という形を、そのまま写しているためです。
+
+   ビルド順序:
+     1. mvn -f shared/pom.xml install   ← 先にこちらをローカルリポジトリへ
+     2. mvn package                    ← Web アプリ側
+
+   Ant を使う場合は build.xml の shared-jar ターゲットが同じことをします
+   (そちらは 2 段階に分ける必要がありません)。
+  ======================================================================
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example</groupId>
+  <artifactId>servlet-sample-shared</artifactId>
+  <!--
+    版は固定で上げます (-SNAPSHOT にしない)。
+    複数サーバー構成では「どの版が動いているか」を後から追えることが最優先で、
+    SNAPSHOT だとビルドした日によって中身が変わってしまいます。
+  -->
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>Java Servlet Sample : 共通ライブラリ</name>
+  <description>複数のアプリから使う共通処理（状態を持たないものだけ）</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>17</maven.compiler.release>
+  </properties>
+
+  <dependencies>
+    <!--
+      テストにだけ JUnit を使います。
+      共通ライブラリは JDK 以外に依存しないので、Tomcat もデータベースも無しで
+      テストが回ります。これが「共通に置いてよいもの」の目印です。
+    -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.10.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <!--
+    実行時の依存関係はありません。
+    ここに servlet-api を足したくなったら、それは「共通に置くべきでないもの」を
+    入れようとしている合図です (共通ライブラリが Web の事情を知り始めます)。
+    Servlet API に触る共通処理は、Web アプリ側の common パッケージに置いてください。
+  -->
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>

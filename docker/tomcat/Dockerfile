@@ -7,10 +7,27 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 
 WORKDIR /build
 
+# 共通ライブラリ (shared/) を先にビルドしてローカルリポジトリへ入れる。
+# アプリ側の pom.xml がこれに依存しているため、順番を逆にすると解決できない。
+# (これは制約ではなく、複数サーバー構成の現場と同じ順番です。
+#  共通ライブラリを先にリリースし、アプリはその版を参照する)
+COPY shared/pom.xml ./shared/pom.xml
+COPY shared/src ./shared/src
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -q -f shared/pom.xml install
+
 # 依存関係の解決だけ先に行い、Docker のレイヤキャッシュを効かせる
 COPY pom.xml ./
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -q dependency:go-offline
+
+# サンプル「共通処理を JAR に切り出す」のソースコードタブに出すビルド設定。
+# pom.xml の <webResources> がこれらを参照しているため、COPY しないと
+# 「basedir /build/.settings does not exist」でビルドが失敗します
+# (maven-war-plugin は webResources の directory が無いとエラーになります)。
+# 追加・変更するときは pom.xml の <webResources> と .dockerignore も合わせてください。
+COPY build.xml .classpath ./
+COPY .settings ./.settings
 
 COPY src ./src
 RUN --mount=type=cache,target=/root/.m2 \
