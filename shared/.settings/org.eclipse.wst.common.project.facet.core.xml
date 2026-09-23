@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  jst.utility = 「WAR や EAR に JAR として同梱されるプロジェクト」。
+  Web プロジェクト側の jst.web と対になります。
+-->
+<faceted-project>
+  <fixed facet="java"/>
+  <fixed facet="jst.utility"/>
+  <installed facet="java" version="17"/>
+  <installed facet="jst.utility" version="1.0"/>
+</faceted-project>

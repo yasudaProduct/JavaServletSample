@@ -19,6 +19,22 @@
         <wb-resource deploy-path="/WEB-INF/lib" source-path="/lib/runtime"/>
 
         <!--
+          共通ライブラリ (別プロジェクト) を JAR にして WEB-INF/lib へ入れる。
+          ビルド・パス側の参照 (.classpath) だけでは WAR に入らないので、
+          この 1 件が無いと実行時に NoClassDefFoundError になります。
+
+          handle の書式は module:/resource/{プロジェクト名}/{モジュール名} です。
+          もし Eclipse が認識しない場合は、
+          プロジェクト → プロパティ → デプロイメント・アセンブリー → 追加 → プロジェクト
+          から servlet-sample-shared を選び直してください (同じ内容が書かれます)。
+        -->
+        <dependent-module archiveName="servlet-sample-shared-1.0.0.jar"
+                          deploy-path="/WEB-INF/lib"
+                          handle="module:/resource/servlet-sample-shared/servlet-sample-shared">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+
+        <!--
           コンテキストルート。Eclipse 上の URL は http://localhost:8080/ROOT/ になります。
           http://localhost:8080/ にしたい場合は
           プロジェクト → プロパティ → Web プロジェクトの設定 で / に変更してください

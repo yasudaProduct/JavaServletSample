@@ -20,6 +20,8 @@ public enum Category {
     SESSION("session", "セッション・認証", "ログイン、スコープ、権限チェック", "shield-lock"),
     FILE("file", "ファイル", "アップロード、ダウンロード、CSV / PDF 出力", "file-earmark-arrow-up"),
     AJAX("ajax", "非同期通信", "Ajax、JSON API との連携", "arrow-repeat"),
+    SHARED("shared", "複数サーバー・共通化",
+            "サーバーを分けたときの共通処理の切り出し方とビルド", "diagram-3"),
     ADVANCED("advanced", "応用・その他", "フィルタ、エラー処理、国際化など", "gear");
 
     private final String id;

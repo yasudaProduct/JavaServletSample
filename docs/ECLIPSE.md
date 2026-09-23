@@ -10,6 +10,7 @@ Docker と Maven を使わず、**Eclipse とそれに同梱されている Ant 
 
 - [用意するもの](#用意するもの)
 - [インポートする](#インポートする)
+- [2 プロジェクト構成（共通ライブラリ）](#2-プロジェクト構成共通ライブラリ)
 - [Ant でビルドする](#ant-でビルドする)
 - [Eclipse の Tomcat で動かす](#eclipse-の-tomcat-で動かす)
 - [「ソースコード」タブを表示する](#ソースコードタブを表示する)
@@ -33,9 +34,14 @@ Docker と Maven を使わず、**Eclipse とそれに同梱されている Ant 
 ## インポートする
 
 1. **ファイル → インポート → 一般 → 既存プロジェクトをワークスペースへ**
-2. 「ルート・ディレクトリ」にこのリポジトリのフォルダを指定 → **完了**
+2. 「ルート・ディレクトリ」にこのリポジトリのフォルダを指定
+3. **プロジェクトが 2 つ**表示されるので、**両方チェックして完了**
+   - `JavaServletSample` … 動的 Web プロジェクト
+   - `servlet-sample-shared` … 共通ライブラリ（Java プロジェクト）
    - ⚠️ **「プロジェクトをワークスペースにコピー」はチェックしない**。コピーすると Git 管理から外れます
-3. `JavaServletSample` という名前で、動的 Web プロジェクトとして開きます
+
+> `servlet-sample-shared` を取り込み忘れると、Web プロジェクト側が
+> 「プロジェクト参照が解決できません」となりコンパイルが通りません。
 
 新規作成ではなくインポートなのは、**設定済みのプロジェクトファイルをコミットしてある**ためです。
 自分で「動的 Web プロジェクトを新規作成」すると、下の表の設定を手で入れ直すことになります。
@@ -57,12 +63,80 @@ Docker と Maven を使わず、**Eclipse とそれに同梱されている Ant 
 | `/src/main/java` | `/WEB-INF/classes`（コンパイル結果） |
 | `/src/main/resources` | `/WEB-INF/classes`（`messages*.properties`） |
 | `/lib/runtime` | `/WEB-INF/lib`（JSTL / H2） |
+| `servlet-sample-shared` プロジェクト | `/WEB-INF/lib/servlet-sample-shared-1.0.0.jar` |
 
 > **ビルド・パスとデプロイメント・アセンブリーは別物です。**
 > 前者は「コンパイルが通るか」、後者は「WAR に入るか」を決めます。
 > 前者だけ設定して後者を忘れると、Eclipse 上では赤線が消えるのに実行時に
 > `NoClassDefFoundError` で落ちます。Eclipse WTP で一番多い詰まりどころなので、
 > 両方あらかじめ入れてあります。
+
+---
+
+## 2 プロジェクト構成（共通ライブラリ）
+
+このリポジトリは、サンプル
+「[共通処理を JAR に切り出す](../src/main/webapp/WEB-INF/views/samples/shared/shared-jar.jsp)」
+の題材として、**実際に 2 プロジェクトに分かれています**。
+
+```
+JavaServletSample/          ← 動的 Web プロジェクト (war)
+├── src/main/java/              画面ごとの Servlet
+├── shared/                     ← 共通ライブラリ (jar)。別プロジェクト
+│   ├── pom.xml                 依存関係を 1 つも持たない
+│   └── src/
+│       ├── main/java/com/example/servletsample/shared/
+│       └── test/java/          共通ライブラリ自身のテスト
+├── pom.xml
+└── build.xml                   両方をビルドする
+```
+
+依存の向きは **アプリ → 共通** の一方向だけです。
+共通側から Web プロジェクトを参照すると循環になり、共通ライブラリを
+単体でリリースできなくなります。Eclipse はプロジェクト参照で循環を作れてしまうので、
+`servlet-sample-shared` の**ビルド・パスに Web プロジェクトが出てきたら事故**です。
+
+### Eclipse 側の設定（すでに入っています）
+
+| | `JavaServletSample` | `servlet-sample-shared` |
+| --- | --- | --- |
+| ファセット | `jst.web 4.0` | **`jst.utility 1.0`** |
+| 依存ライブラリ | `lib/` の jar | **無し（JDK だけ）** |
+| ビルド・パス | `servlet-sample-shared` をプロジェクト参照 | — |
+| デプロイメント・アセンブリー | `servlet-sample-shared` → `WEB-INF/lib` | — |
+
+`jst.utility` が「WAR に JAR として同梱されるプロジェクト」という意味になります。
+これが付いていないと、Web プロジェクト側のデプロイメント・アセンブリーから選べません。
+
+> **手で設定し直す場合**:
+> プロジェクト → プロパティ → デプロイメント・アセンブリー → **追加 → プロジェクト** →
+> `servlet-sample-shared` を選びます。
+> あわせて Java のビルド・パス → **プロジェクト**タブにも追加してください（両方必要です）。
+
+### 共通ライブラリは単体でテストできる
+
+共通ライブラリは JDK 以外に依存していないので、**Tomcat もデータベースも無しで**
+テストが回ります。これが「共通に置いてよいもの」の目印です。
+
+```bash
+ant shared-test                    # 共通ライブラリだけ（15 件）
+mvn -f shared/pom.xml test         # 同じ
+```
+
+逆に、テストするのに Tomcat を起動しないといけない処理は、
+共通ライブラリに置くべきものではありません。
+
+### 共通ライブラリを直したときの手順
+
+1. `shared/` を直す
+2. **両方のアプリで確認する**（片方だけで済ませない。ここが最大の分岐点）
+3. 版を上げる — `shared/pom.xml` の `<version>` と `build.xml` の `shared.version` の**両方**
+4. Web 側の `pom.xml` の依存の版と、`.settings/org.eclipse.wst.common.component` の
+   `archiveName` も同じ版に揃える
+
+版が 4 か所に散っているのは正直に言って面倒です。実務で
+アプリが増えてきたら、ここを 1 か所にまとめる（親 pom のプロパティにする等）
+のが次の一手になります。
 
 ---
 
@@ -74,9 +148,11 @@ Docker と Maven を使わず、**Eclipse とそれに同梱されている Ant 
 | ターゲット | すること | 出力 |
 | --- | --- | --- |
 | `war`（既定） | WAR を作る | `dist/ROOT.war` |
+| `shared-jar` | 共通ライブラリだけを JAR にする | `build/ant/servlet-sample-shared-1.0.0.jar` |
+| `shared-test` | 共通ライブラリだけをテストする（15 件） | コンソール |
 | `explode` | Tomcat の `webapps/` に置ける展開形式を組み立てる | `build/ant/ROOT/` |
 | `compile` | 本体をコンパイルする | `build/ant/classes/` |
-| `test` | JUnit 5 を実行する（646 件） | コンソール |
+| `test` | JUnit 5 を実行する（共通 15 件 + アプリ 668 件） | コンソール |
 | `sources-for-ide` | 「ソースコード」タブ用に `.java` を配置する | `src/main/webapp/WEB-INF/sources/java/` |
 | `clean` | 上記すべてを消す | — |
 | `all` | `clean` → `test` → `war` | `dist/ROOT.war` |
@@ -199,9 +275,20 @@ mvn dependency:copy -Dartifact=org.junit.platform:junit-platform-console-standal
 | 展開形式の出力 | `target/ROOT/` | `build/ant/ROOT/` |
 | WAR | `target/ROOT.war` | `dist/ROOT.war` |
 
-**両者は同じ内容の WAR を作ります。** ファイル構成（375 ファイル）、テスト件数（646 件）、
+**両者は同じ内容の WAR を作ります。** ファイル構成、テスト件数（共通 15 件 + アプリ 668 件）、
 バイトコードのバージョン（Java 17）が一致することを確認済みです。
 どちらか片方だけを使っても構いません。
+
+Maven だけ **2 段階**になります。共通ライブラリが別プロジェクトなので、
+先にローカルリポジトリへ入れる必要があるためです。
+
+```bash
+mvn -f shared/pom.xml install   # ① 共通ライブラリ
+mvn package                     # ② アプリ側
+# make build でも同じ（shared が先に走ります）
+
+ant                             # Ant は 1 つのビルドの中で順番に作る
+```
 
 片方だけ直して片方を放置すると食い違うので、`pom.xml` を触ったら `build.xml` と `.classpath`、
 `build.xml` を触ったら `pom.xml` も見てください。対応関係は次のとおりです。
@@ -213,6 +300,8 @@ mvn dependency:copy -Dartifact=org.junit.platform:junit-platform-console-standal
 | `<dependency>` の `provided` スコープ | `lib/provided/` |
 | `<dependency>` の `compile` スコープ | `lib/runtime/` |
 | `<webResources>` → `WEB-INF/sources/java` | `explode` ターゲット ④ |
+| `shared/pom.xml` の `<version>` | `shared.version` プロパティ |
+| `<dependency>` の `servlet-sample-shared` | `shared-jar` ターゲット |
 
 ---
 
@@ -220,6 +309,10 @@ mvn dependency:copy -Dartifact=org.junit.platform:junit-platform-console-standal
 
 | 症状 | 原因 | 対処 |
 | --- | --- | --- |
+| 「プロジェクト参照が解決できません」 | `servlet-sample-shared` をインポートしていない | インポート時に**両方**チェックする |
+| `com.example.servletsample.shared` が見つからない | 同上、またはビルド・パスのプロジェクト参照が外れている | プロパティ → Java のビルド・パス → プロジェクト を確認 |
+| 実装が 0 件になる（ServiceLoader） | `META-INF/services` が `src/main/java` に置かれている | `src/main/resources/META-INF/services/` に移す |
+| `mvn package` が `servlet-sample-shared` を解決できない | 先に `install` していない | `mvn -f shared/pom.xml install` を先に実行（`make build` なら自動） |
 | 実行時に `NoClassDefFoundError` / `ClassNotFoundException` | ビルド・パスにはあるが**デプロイメント・アセンブリーに無い** | プロパティ → デプロイメント・アセンブリー を確認。jar は `lib/runtime` に置く |
 | 起動時に `offending class: javax/servlet/Servlet.class` | `servlet-api` が WAR に入っている | デプロイメント・アセンブリーに `lib/provided` を足さない |
 | 「ソースコード」タブが空 | `WEB-INF/sources/java` が無い | `ant sources-for-ide` を実行 |

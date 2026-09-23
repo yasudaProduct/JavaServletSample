@@ -33,6 +33,12 @@ Maven 側は `pom.xml` の `<finalName>ROOT</finalName>` で名前を合わせ�
 Maven の依存解決は Docker のキャッシュマウント（`--mount=type=cache,target=/root/.m2`）を使うので、
 2 回目以降のビルドはライブラリを再ダウンロードしません。
 
+このリポジトリは **2 プロジェクト構成**です。`shared/` が共通ライブラリ（jar）で、
+ビルドすると WAR の `WEB-INF/lib/servlet-sample-shared-1.0.0.jar` として同梱されます。
+Maven では先に `mvn -f shared/pom.xml install` が必要で、Dockerfile もその順番で書いてあります
+（Ant は 1 つのビルドの中で順番に作ります）。
+これ自体が「複数サーバー・共通化」カテゴリのサンプルの題材になっています。
+
 > Docker と Maven を使わず、Eclipse 同梱の Ant だけでビルドすることもできます
 > （`ant war` → `dist/ROOT.war`）。手順は **[ECLIPSE.md](ECLIPSE.md)** にあります。
 > 両者は同じ内容の WAR を作ります。

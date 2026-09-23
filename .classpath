@@ -25,6 +25,17 @@
 		</attributes>
 	</classpathentry>
 
+	<!--
+		共通ライブラリ (別プロジェクト) への参照。
+		ワークスペースに shared/ も一緒にインポートしておく必要があります。
+
+		これは「コンパイルが通るように」するための参照です。
+		WAR の WEB-INF/lib に JAR として入れるほうは
+		.settings/org.eclipse.wst.common.component の dependent-module が担当します。
+		両方セットで必要で、片方だけだと実行時に NoClassDefFoundError になります。
+	-->
+	<classpathentry combineaccessrules="false" kind="src" path="/servlet-sample-shared"/>
+
 	<!-- JDK 17 以上 (pom.xml / build.xml の release=17 に合わせる) -->
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
 

@@ -26,6 +26,23 @@
   </properties>
 
   <dependencies>
+    <!--
+      共通ライブラリ (shared/pom.xml)。別プロジェクトとして先にビルドし、
+      ローカルリポジトリへ install してから参照します。
+
+        mvn -f shared/pom.xml install
+        mvn package
+
+      版は固定で書きます (-SNAPSHOT にしない)。複数サーバー構成では
+      「どのサーバーがどの版で動いているか」を後から追えることが最優先です。
+      WAR の WEB-INF/lib に同梱されるので、WAR を戻せば共通処理の版も戻ります。
+    -->
+    <dependency>
+      <groupId>com.example</groupId>
+      <artifactId>servlet-sample-shared</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+
     <!-- Servlet API : Tomcat が提供するため provided -->
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -97,6 +114,42 @@
               <targetPath>WEB-INF/sources/java</targetPath>
               <includes>
                 <include>**/*.java</include>
+              </includes>
+            </resource>
+            <!-- 共通ライブラリのソースは別プロジェクトなので別の場所に置く -->
+            <resource>
+              <directory>shared/src/main/java</directory>
+              <targetPath>WEB-INF/sources/shared</targetPath>
+              <includes>
+                <include>**/*.java</include>
+              </includes>
+            </resource>
+            <!--
+              ビルド設定そのもの。「共通処理を JAR に切り出す」サンプルで、
+              Eclipse / Ant / Maven の 3 つが同じことをどう書いているかを画面に並べます。
+              (build.xml の explode ターゲット ⑤ と同じ内容)
+            -->
+            <resource>
+              <directory>${project.basedir}</directory>
+              <targetPath>WEB-INF/sources/build</targetPath>
+              <includes>
+                <include>pom.xml</include>
+                <include>build.xml</include>
+                <include>.classpath</include>
+              </includes>
+            </resource>
+            <resource>
+              <directory>${project.basedir}/.settings</directory>
+              <targetPath>WEB-INF/sources/build</targetPath>
+              <includes>
+                <include>org.eclipse.wst.common.component</include>
+              </includes>
+            </resource>
+            <resource>
+              <directory>${project.basedir}/shared</directory>
+              <targetPath>WEB-INF/sources/build/shared</targetPath>
+              <includes>
+                <include>pom.xml</include>
               </includes>
             </resource>
           </webResources>

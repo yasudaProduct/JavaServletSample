@@ -15,9 +15,10 @@ build.xml
 lib
 build
 dist
-.classpath
-.project
-.settings
+**/build
+**/.classpath
+**/.project
+**/.settings
 
 # ---- Cloudflare / Node ----
 # Docker のビルドコンテキストに入れる必要が無いもの

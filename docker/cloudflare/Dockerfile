@@ -28,6 +28,11 @@ FROM --platform=$BUILDPLATFORM maven:3.9-eclipse-temurin-17 AS build
 
 WORKDIR /build
 
+# 共通ライブラリ (shared/) を先にビルドしてローカルリポジトリへ入れる
+COPY shared/pom.xml ./shared/pom.xml
+COPY shared/src ./shared/src
+RUN mvn -B -q --no-transfer-progress -f shared/pom.xml install
+
 # 依存関係の解決だけ先に行い、Docker のレイヤキャッシュを効かせる
 COPY pom.xml ./
 RUN mvn -B -q --no-transfer-progress dependency:go-offline

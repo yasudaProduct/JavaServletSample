@@ -21,17 +21,25 @@ logs: ## Tomcat のログを追う
 shell: ## コンテナに入る
 	docker compose exec tomcat bash
 
-build: ## ホストの Maven でビルドする
+shared: ## 共通ライブラリ (shared/) をビルドしてローカルリポジトリへ入れる
+	mvn -B -f shared/pom.xml install
+
+build: shared ## ホストの Maven でビルドする
 	mvn -B clean package
 
-test: ## ホストの Maven でテストする
+test: shared ## ホストの Maven でテストする
 	mvn -B test
+
+ant: ## Ant でビルドする (Eclipse 同梱の Ant でも同じことができる)
+	ant clean war
 
 dbuild: ## Docker 上の Maven でビルドする (ローカルに JDK/Maven が無い場合)
 	docker compose run --rm maven -B clean package
 
 clean: ## ビルド成果物とコンテナを削除する
 	mvn -B clean || true
+	mvn -B -f shared/pom.xml clean || true
+	ant clean || true
 	docker compose down -v
 
 # ---- Cloudflare へのデプロイ ----
@@ -46,4 +54,4 @@ cf-dev: ## Cloudflare の構成でローカル起動する (要 Docker)
 cf-logs: ## 本番の Worker のログを追う
 	npx wrangler tail
 
-.PHONY: help up down restart logs shell build test dbuild clean deploy cf-dev cf-logs
+.PHONY: help up down restart logs shell shared build test ant dbuild clean deploy cf-dev cf-logs

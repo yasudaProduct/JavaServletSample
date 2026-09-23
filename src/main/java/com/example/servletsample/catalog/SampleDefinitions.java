@@ -113,6 +113,19 @@ import com.example.servletsample.samples.session.LogoutServlet;
 import com.example.servletsample.samples.session.PasswordHash;
 import com.example.servletsample.samples.session.ProtectedPageServlet;
 import com.example.servletsample.samples.session.UserAccounts;
+import com.example.servletsample.samples.shared.EmployeeCodeResolver;
+import com.example.servletsample.samples.shared.ProductCodeResolver;
+import com.example.servletsample.samples.shared.SharedInterfaceServlet;
+import com.example.servletsample.samples.shared.SharedJarServlet;
+import com.example.servletsample.samples.shared.SharedSequenceDao;
+import com.example.servletsample.samples.shared.SharedStateServlet;
+import com.example.servletsample.samples.shared.SimulatedServer;
+import com.example.servletsample.shared.ClassOrigin;
+import com.example.servletsample.shared.CodeFormatter;
+import com.example.servletsample.shared.CodeResolver;
+import com.example.servletsample.shared.ResolverRegistry;
+import com.example.servletsample.shared.SequenceCounter;
+import com.example.servletsample.shared.SharedLibrary;
 
 /**
  * ★ サンプルを追加する場所 ★
@@ -719,6 +732,65 @@ final class SampleDefinitions {
                 .source(AsyncJobListener.class)
                 .source(AsyncWorkerPool.class)
                 .source(Json.class)
+                .build());
+
+        // ==================================================================
+        // 複数サーバー・共通化
+        // ==================================================================
+
+        samples.add(Sample.builder("shared-jar", Category.SHARED)
+                .title("共通処理を JAR に切り出す")
+                .summary("サーバーが 2 台に分かれた構成で、共通処理をどう分けるか。"
+                        + "別プロジェクトにして JAR にし、それぞれの WAR に同梱します。"
+                        + "クラスごとの実際の読み込み元を一覧にするので、"
+                        + "「共有されているのではなく同梱されている」ことが目で見えます。")
+                .tags("共通化", "JAR", "マルチプロジェクト", "クラスローダ", "CodeSource",
+                        "provided", "ビルド", "Eclipse", "Ant", "Maven", "版の固定")
+                .source(SharedJarServlet.class)
+                .source(SourceFile.shared(SharedLibrary.class))
+                .source(SourceFile.shared(ClassOrigin.class))
+                // ビルド設定そのものも並べる (3 つのツールで同じことを書いている)
+                .source(SourceFile.of("/WEB-INF/sources/build/shared/pom.xml",
+                        "shared/pom.xml", "xml"))
+                .source(SourceFile.of("/WEB-INF/sources/build/pom.xml", "pom.xml", "xml"))
+                .source(SourceFile.of("/WEB-INF/sources/build/build.xml", "build.xml", "xml"))
+                .source(SourceFile.of("/WEB-INF/sources/build/.classpath",
+                        ".classpath (Eclipse のビルド・パス)", "xml"))
+                .source(SourceFile.of("/WEB-INF/sources/build/org.eclipse.wst.common.component",
+                        "org.eclipse.wst.common.component (デプロイメント・アセンブリー)", "xml"))
+                .build());
+
+        samples.add(Sample.builder("shared-interface", Category.SHARED)
+                .title("インタフェースで共通側とアプリ側を切り離す")
+                .summary("JAR を分けるだけでは「共通側がアプリの事情を知ってしまう」問題は解けません。"
+                        + "共通側はインタフェースだけを持ち、実装はアプリ側に置きます。"
+                        + "ServiceLoader で実装を差し替えると、共通側を一切変えずに"
+                        + "アプリごとのルールを持てることが確かめられます。")
+                .tags("共通化", "インタフェース", "ServiceLoader", "依存性逆転", "META-INF/services",
+                        "依存の向き", "分岐フラグ", "SPI")
+                .source(SharedInterfaceServlet.class)
+                .source(SourceFile.shared(CodeResolver.class))
+                .source(SourceFile.shared(ResolverRegistry.class))
+                .source(SourceFile.shared(CodeFormatter.class))
+                .source(EmployeeCodeResolver.class)
+                .source(ProductCodeResolver.class)
+                .source(SourceFile.of("/WEB-INF/classes/META-INF/services/"
+                        + "com.example.servletsample.shared.CodeResolver",
+                        "META-INF/services/....CodeResolver", "ini"))
+                .build());
+
+        samples.add(Sample.builder("shared-state", Category.SHARED)
+                .title("共通化できないもの（状態）")
+                .summary("JAR を共通化しても、状態は共通化できません。サーバーが 2 台なら JVM も 2 つで、"
+                        + "static はそれぞれ別に存在します。共通 JAR を別のクラスローダで読み直して"
+                        + "「もう 1 台」を作り、static の採番が重複する様子と、"
+                        + "DB に寄せると重複しない様子を並べて確かめます。")
+                .tags("共通化", "状態", "static", "採番", "クラスローダ", "URLClassLoader",
+                        "セッション", "キャッシュ", "二重実行", "シーケンス", "Serializable")
+                .source(SharedStateServlet.class)
+                .source(SourceFile.shared(SequenceCounter.class))
+                .source(SimulatedServer.class)
+                .source(SharedSequenceDao.class)
                 .build());
 
         // ------------------------------------------------------------------

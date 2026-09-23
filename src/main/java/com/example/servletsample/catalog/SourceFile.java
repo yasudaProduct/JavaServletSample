@@ -14,6 +14,16 @@ public final class SourceFile {
     /** Java のソースを WAR に取り込んでいる場所 (pom.xml の maven-war-plugin 参照)。 */
     public static final String JAVA_ROOT = "/WEB-INF/sources/java";
 
+    /**
+     * 共通ライブラリ (shared プロジェクト) のソースを取り込んでいる場所。
+     *
+     * <p>アプリ本体と分けているのは、<b>別プロジェクトであることを明示するため</b>です。
+     * WAR の中でも {@code WEB-INF/classes} ではなく
+     * {@code WEB-INF/lib/servlet-sample-shared-x.y.z.jar} に入っているので、
+     * ソースの置き場所も分けています。</p>
+     */
+    public static final String SHARED_ROOT = "/WEB-INF/sources/shared";
+
     private final String path;
     private final String label;
     private final String language;
@@ -30,12 +40,24 @@ public final class SourceFile {
      * クラス名を変更してもカタログ側の修正漏れが起きません。</p>
      */
     public static SourceFile of(Class<?> type) {
+        return javaSource(JAVA_ROOT, type);
+    }
+
+    /**
+     * 共通ライブラリ (shared プロジェクト) のクラスからソースファイルを指定する。
+     * <p>{@code SourceFile.shared(SharedLibrary.class)} のように書きます。</p>
+     */
+    public static SourceFile shared(Class<?> type) {
+        return javaSource(SHARED_ROOT, type);
+    }
+
+    private static SourceFile javaSource(String root, Class<?> type) {
         String binaryName = type.getName();
         int nested = binaryName.indexOf('$');
         if (nested >= 0) {
             binaryName = binaryName.substring(0, nested);
         }
-        String path = JAVA_ROOT + "/" + binaryName.replace('.', '/') + ".java";
+        String path = root + "/" + binaryName.replace('.', '/') + ".java";
         return new SourceFile(path, null, "java");
     }
 
