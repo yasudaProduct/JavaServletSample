@@ -21,6 +21,14 @@ COPY pom.xml ./
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -q dependency:go-offline
 
+# サンプル「共通処理を JAR に切り出す」のソースコードタブに出すビルド設定。
+# pom.xml の <webResources> がこれらを参照しているため、COPY しないと
+# 「basedir /build/.settings does not exist」でビルドが失敗します
+# (maven-war-plugin は webResources の directory が無いとエラーになります)。
+# 追加・変更するときは pom.xml の <webResources> と .dockerignore も合わせてください。
+COPY build.xml .classpath ./
+COPY .settings ./.settings
+
 COPY src ./src
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -q clean package -DskipTests

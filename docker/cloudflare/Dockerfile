@@ -37,6 +37,14 @@ RUN mvn -B -q --no-transfer-progress -f shared/pom.xml install
 COPY pom.xml ./
 RUN mvn -B -q --no-transfer-progress dependency:go-offline
 
+# サンプル「共通処理を JAR に切り出す」のソースコードタブに出すビルド設定。
+# pom.xml の <webResources> がこれらを参照しているため、COPY しないと
+# 「basedir /build/.settings does not exist」でビルドが失敗します
+# (maven-war-plugin は webResources の directory が無いとエラーになります)。
+# 追加・変更するときは pom.xml の <webResources> と .dockerignore も合わせてください。
+COPY build.xml .classpath ./
+COPY .settings ./.settings
+
 # テストは GitHub Actions 側で実行済みのためここではスキップする
 COPY src ./src
 RUN mvn -B -q --no-transfer-progress clean package -DskipTests
