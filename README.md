@@ -35,6 +35,22 @@ docker compose down            # 停止
 
 `make` が使える環境なら `make up` / `make down` / `make logs` でも同じことができます（`make help` で一覧）。
 
+### Docker を使わない場合（Eclipse / Ant）
+
+Docker や Maven を使わず、**Eclipse とそれに同梱されている Ant だけ**でもビルドできます。
+依存ライブラリは `lib/` にコミットしてあるためネットワークも不要です。
+
+```bash
+ant            # dist/ROOT.war を作る
+ant test       # JUnit 5 を実行する
+```
+
+Eclipse へは「既存プロジェクトをワークスペースへ」でインポートすれば、
+動的 Web プロジェクトとしてそのまま開きます（設定済みのプロジェクトファイルを同梱しています）。
+
+**手順は [docs/ECLIPSE.md](docs/ECLIPSE.md)** にまとめてあります。
+Maven 側と同じ内容の WAR ができるので、どちらを使っても構いません。
+
 ---
 
 ## 2. 開発の流れ
@@ -68,12 +84,15 @@ JavaServletSample/
 ├── docker/tomcat/               開発用（Maven でビルド → Tomcat 9 に配置）
 ├── docker/cloudflare/           本番用（Cloudflare Containers 向け）
 ├── pom.xml                      Maven の設定
+├── build.xml                    Ant の設定（Maven を使わないルート）
+├── lib/                         Ant / Eclipse 用の依存ライブラリ（provided / runtime / test）
 ├── Makefile                     よく使うコマンド
 ├── wrangler.jsonc               Cloudflare の設定（デプロイ先）
 ├── worker/index.ts              Cloudflare Worker（コンテナへの入口）
 ├── .github/workflows/           GitHub Actions（main への push でデプロイ）
 ├── docs/                        追加ドキュメント
 ├── .vscode/                     VS Code の設定・デバッグ構成
+├── .settings/ .classpath .project   Eclipse の設定（動的 Web プロジェクト）
 └── src/
     ├── main/
     │   ├── java/com/example/servletsample/

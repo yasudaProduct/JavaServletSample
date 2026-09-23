@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  デプロイメント・アセンブリー (Deployment Assembly)。
+  「どのフォルダを WAR のどこに置くか」の対応表です。
+  画面の プロジェクト → プロパティ → デプロイメント・アセンブリー と同じ内容です。
+
+  build.xml の explode ターゲットと同じ組み立てになるようにしてあります。
+-->
+<project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="ROOT">
+        <!-- 画面まわり一式 (WEB-INF/web.xml, views, tags, tlds, assets) を WAR のルートへ -->
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+
+        <!-- Java のコンパイル結果と設定ファイルを WEB-INF/classes へ -->
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+
+        <!-- JSTL / H2 を WEB-INF/lib へ。フォルダごと割り当てているので jar を足すだけで反映される -->
+        <wb-resource deploy-path="/WEB-INF/lib" source-path="/lib/runtime"/>
+
+        <!--
+          コンテキストルート。Eclipse 上の URL は http://localhost:8080/ROOT/ になります。
+          http://localhost:8080/ にしたい場合は
+          プロジェクト → プロパティ → Web プロジェクトの設定 で / に変更してください
+          (このアプリは request.getContextPath() を使っているのでどちらでも動きます)。
+        -->
+        <property name="context-root" value="ROOT"/>
+        <property name="java-output-path" value="/build/classes"/>
+    </wb-module>
+</project-modules>

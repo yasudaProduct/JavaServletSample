@@ -8,6 +8,17 @@ docs
 *.md
 !README.md
 
+# ---- Ant / Eclipse ----
+# Docker 側は Maven でビルドするため、Ant / Eclipse 用のものは送らない
+# (lib/ は約 6MB あるので、入れるとビルドコンテキストの転送が無駄に重くなる)
+build.xml
+lib
+build
+dist
+.classpath
+.project
+.settings
+
 # ---- Cloudflare / Node ----
 # Docker のビルドコンテキストに入れる必要が無いもの
 node_modules

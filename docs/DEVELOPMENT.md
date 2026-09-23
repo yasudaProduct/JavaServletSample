@@ -33,6 +33,10 @@ Maven 側は `pom.xml` の `<finalName>ROOT</finalName>` で名前を合わせ�
 Maven の依存解決は Docker のキャッシュマウント（`--mount=type=cache,target=/root/.m2`）を使うので、
 2 回目以降のビルドはライブラリを再ダウンロードしません。
 
+> Docker と Maven を使わず、Eclipse 同梱の Ant だけでビルドすることもできます
+> （`ant war` → `dist/ROOT.war`）。手順は **[ECLIPSE.md](ECLIPSE.md)** にあります。
+> 両者は同じ内容の WAR を作ります。
+
 ---
 
 ## ホットリロードの仕組み

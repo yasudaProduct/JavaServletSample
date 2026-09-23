@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ファセット = 「このプロジェクトが何であるか」の宣言。
+    jst.web 4.0 … Servlet 4.0 の Web アプリ (web.xml の version="4.0" と対応)
+    java 17     … Java 17
+
+  Tomcat 10 以降 (jakarta.*) に上げるときは jst.web を 5.0 にし、
+  lib/provided の jar も jakarta 版に差し替えてください。
+
+  ターゲット・ランタイム (<runtime name="..."/>) は環境ごとに違うため、
+  あえて書いていません。Eclipse 側で登録済みの Tomcat を選んでください。
+-->
+<faceted-project>
+  <fixed facet="java"/>
+  <fixed facet="jst.web"/>
+  <installed facet="java" version="17"/>
+  <installed facet="jst.web" version="4.0"/>
+</faceted-project>
