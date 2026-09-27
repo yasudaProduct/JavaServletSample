@@ -134,6 +134,8 @@
               <targetPath>WEB-INF/sources/test</targetPath>
               <includes>
                 <include>**/*.java</include>
+                <!-- 仕様化テストの記録ファイル (EstimateGoldenMasterTest.approved.txt) も画面に出す -->
+                <include>**/*.approved.txt</include>
               </includes>
             </resource>
             <!--

@@ -120,8 +120,11 @@ import com.example.servletsample.samples.shared.SharedJarServlet;
 import com.example.servletsample.samples.shared.SharedSequenceDao;
 import com.example.servletsample.samples.shared.SharedStateServlet;
 import com.example.servletsample.samples.shared.SimulatedServer;
+import com.example.servletsample.samples.test.EstimateCalculator;
+import com.example.servletsample.samples.test.EstimateServlet;
 import com.example.servletsample.samples.test.InMemoryOrderRepository;
 import com.example.servletsample.samples.test.JdbcOrderRepository;
+import com.example.servletsample.samples.test.LegacyEstimateServlet;
 import com.example.servletsample.samples.test.MemberRank;
 import com.example.servletsample.samples.test.OrderAmount;
 import com.example.servletsample.samples.test.OrderForm;
@@ -873,6 +876,25 @@ final class SampleDefinitions {
                 .source(OrderServlet.class)
                 .source(JdbcOrderRepository.class)
                 .source(ServletDbTestDemoServlet.class)
+                .build());
+
+        samples.add(Sample.builder("characterization-test", Category.TESTING)
+                .title("仕様化テストで今の動きを記録する")
+                .summary("仕様書もテストも無い古い Servlet を、書き換えずにテストする。"
+                        + "今の動きをそのまま期待値にする仕様化テストの意味と活用場面、"
+                        + "1 件ずつ書き写す手順、結果をまとめて記録するゴールデンマスター、"
+                        + "記録を安全網にして計算を切り出すところまで。")
+                .tags("テスト", "仕様化テスト", "Characterization Test", "ゴールデンマスター",
+                        "ApprovalTests", "レガシーコード", "リファクタリング", "JUnit")
+                .source(LegacyEstimateServlet.class)
+                .testSource("com.example.servletsample.samples.test.LegacyEstimateCharacterizationTest")
+                .testSource("com.example.servletsample.samples.test.EstimateGoldenMasterTest")
+                .source(SourceFile.of(SourceFile.JAVA_TEST_ROOT
+                        + "/com/example/servletsample/samples/test/EstimateGoldenMasterTest.approved.txt",
+                        "EstimateGoldenMasterTest.approved.txt", "plaintext"))
+                .testSource("com.example.servletsample.samples.test.EstimateRequests")
+                .source(EstimateCalculator.class)
+                .source(EstimateServlet.class)
                 .build());
 
         // ------------------------------------------------------------------
