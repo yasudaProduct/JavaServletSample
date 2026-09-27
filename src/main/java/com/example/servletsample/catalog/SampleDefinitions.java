@@ -132,6 +132,7 @@ import com.example.servletsample.samples.test.OrderResult;
 import com.example.servletsample.samples.test.OrderService;
 import com.example.servletsample.samples.test.OrderServlet;
 import com.example.servletsample.samples.test.PricingDemoServlet;
+import com.example.servletsample.samples.test.ServletDbTestDemoServlet;
 import com.example.servletsample.samples.test.TestDoubleDemoServlet;
 import com.example.servletsample.shared.ClassOrigin;
 import com.example.servletsample.shared.CodeFormatter;
@@ -858,6 +859,20 @@ final class SampleDefinitions {
                 .testSource("com.example.servletsample.samples.test.FakeHttpServletResponse")
                 .source(OrderForm.class)
                 .source(SourceFile.jsp("/WEB-INF/views/samples/test/servlet-test.jsp"))
+                .build());
+
+        samples.add(Sample.builder("servlet-db-test", Category.TESTING)
+                .title("doPost から DB まで通してテストする")
+                .summary("本番と同じ組み立てのまま doPost を呼び、テーブルの中身まで確かめる。"
+                        + "テストごとのデータ準備と後片付け、結果を自分の SQL で確かめる理由、"
+                        + "現場の DB につなぐときの注意まで。ソースを変えずに書けるテスト。")
+                .tags("テスト", "結合テスト", "Servlet", "doPost", "データベース", "H2", "JDBC",
+                        "テストデータ", "ResourceLock", "JUnit")
+                .testSource("com.example.servletsample.samples.test.OrderServletDbTest")
+                .testSource("com.example.servletsample.samples.test.OrderTables")
+                .source(OrderServlet.class)
+                .source(JdbcOrderRepository.class)
+                .source(ServletDbTestDemoServlet.class)
                 .build());
 
         // ------------------------------------------------------------------
