@@ -120,8 +120,11 @@ import com.example.servletsample.samples.shared.SharedJarServlet;
 import com.example.servletsample.samples.shared.SharedSequenceDao;
 import com.example.servletsample.samples.shared.SharedStateServlet;
 import com.example.servletsample.samples.shared.SimulatedServer;
+import com.example.servletsample.samples.test.EstimateCalculator;
+import com.example.servletsample.samples.test.EstimateServlet;
 import com.example.servletsample.samples.test.InMemoryOrderRepository;
 import com.example.servletsample.samples.test.JdbcOrderRepository;
+import com.example.servletsample.samples.test.LegacyEstimateServlet;
 import com.example.servletsample.samples.test.MemberRank;
 import com.example.servletsample.samples.test.OrderAmount;
 import com.example.servletsample.samples.test.OrderForm;
@@ -132,6 +135,7 @@ import com.example.servletsample.samples.test.OrderResult;
 import com.example.servletsample.samples.test.OrderService;
 import com.example.servletsample.samples.test.OrderServlet;
 import com.example.servletsample.samples.test.PricingDemoServlet;
+import com.example.servletsample.samples.test.ServletDbTestDemoServlet;
 import com.example.servletsample.samples.test.TestDoubleDemoServlet;
 import com.example.servletsample.shared.ClassOrigin;
 import com.example.servletsample.shared.CodeFormatter;
@@ -858,6 +862,39 @@ final class SampleDefinitions {
                 .testSource("com.example.servletsample.samples.test.FakeHttpServletResponse")
                 .source(OrderForm.class)
                 .source(SourceFile.jsp("/WEB-INF/views/samples/test/servlet-test.jsp"))
+                .build());
+
+        samples.add(Sample.builder("servlet-db-test", Category.TESTING)
+                .title("doPost から DB まで通してテストする")
+                .summary("本番と同じ組み立てのまま doPost を呼び、テーブルの中身まで確かめる。"
+                        + "テストごとのデータ準備と後片付け、結果を自分の SQL で確かめる理由、"
+                        + "現場の DB につなぐときの注意まで。ソースを変えずに書けるテスト。")
+                .tags("テスト", "結合テスト", "Servlet", "doPost", "データベース", "H2", "JDBC",
+                        "テストデータ", "ResourceLock", "JUnit")
+                .testSource("com.example.servletsample.samples.test.OrderServletDbTest")
+                .testSource("com.example.servletsample.samples.test.OrderTables")
+                .source(OrderServlet.class)
+                .source(JdbcOrderRepository.class)
+                .source(ServletDbTestDemoServlet.class)
+                .build());
+
+        samples.add(Sample.builder("characterization-test", Category.TESTING)
+                .title("仕様化テストで今の動きを記録する")
+                .summary("仕様書もテストも無い古い Servlet を、書き換えずにテストする。"
+                        + "今の動きをそのまま期待値にする仕様化テストの意味と活用場面、"
+                        + "1 件ずつ書き写す手順、結果をまとめて記録するゴールデンマスター、"
+                        + "記録を安全網にして計算を切り出すところまで。")
+                .tags("テスト", "仕様化テスト", "Characterization Test", "ゴールデンマスター",
+                        "ApprovalTests", "レガシーコード", "リファクタリング", "JUnit")
+                .source(LegacyEstimateServlet.class)
+                .testSource("com.example.servletsample.samples.test.LegacyEstimateCharacterizationTest")
+                .testSource("com.example.servletsample.samples.test.EstimateGoldenMasterTest")
+                .source(SourceFile.of(SourceFile.JAVA_TEST_ROOT
+                        + "/com/example/servletsample/samples/test/EstimateGoldenMasterTest.approved.txt",
+                        "EstimateGoldenMasterTest.approved.txt", "plaintext"))
+                .testSource("com.example.servletsample.samples.test.EstimateRequests")
+                .source(EstimateCalculator.class)
+                .source(EstimateServlet.class)
                 .build());
 
         // ------------------------------------------------------------------

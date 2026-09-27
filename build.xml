@@ -214,6 +214,8 @@
     -->
     <copy todir="${war.dir}/WEB-INF/sources/test">
       <fileset dir="${test.java.dir}" includes="**/*.java"/>
+      <!-- 仕様化テストの記録ファイル (EstimateGoldenMasterTest.approved.txt) も画面に出す -->
+      <fileset dir="${test.java.dir}" includes="**/*.approved.txt"/>
     </copy>
 
     <!--

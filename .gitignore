@@ -32,3 +32,6 @@ work/
 node_modules/
 .wrangler/
 .dev.vars
+
+# 仕様化テスト (EstimateGoldenMasterTest) が、記録と違ったときに書き出す今回の結果
+*.received.txt
