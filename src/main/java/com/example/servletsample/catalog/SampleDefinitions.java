@@ -78,6 +78,13 @@ import com.example.servletsample.samples.file.CsvExportServlet;
 import com.example.servletsample.samples.file.CsvOptions;
 import com.example.servletsample.samples.file.FileDownloadServlet;
 import com.example.servletsample.samples.file.FileUploadServlet;
+import com.example.servletsample.samples.file.PdfDocument;
+import com.example.servletsample.samples.file.PdfDocumentDao;
+import com.example.servletsample.samples.file.PdfFolder;
+import com.example.servletsample.samples.file.PdfFromDbServlet;
+import com.example.servletsample.samples.file.PdfFromFileServlet;
+import com.example.servletsample.samples.file.PdfResponse;
+import com.example.servletsample.samples.file.PdfViewServlet;
 import com.example.servletsample.samples.file.SalesRecord;
 import com.example.servletsample.samples.file.SalesRecords;
 import com.example.servletsample.samples.file.StoredFile;
@@ -561,6 +568,22 @@ final class SampleDefinitions {
                 .source(CsvOptions.class)
                 .source(SalesRecord.class)
                 .source(SalesRecords.class)
+                .build());
+
+        samples.add(Sample.builder("pdf-view", Category.FILE)
+                .title("PDF を画面に表示する（ファイル / DB・埋め込み / 別タブ / ポップアップ）")
+                .summary("フォルダに置いた PDF と、DB の BLOB 列に入れた PDF を Servlet から返し、"
+                        + "画面の中への埋め込み・別タブ・ポップアップ（モーダル / 別ウィンドウ）で見せる。"
+                        + "表示とダウンロードの違いは Content-Disposition の 1 語だけ。")
+                .tags("PDF", "表示", "iframe", "別タブ", "ポップアップ", "モーダル", "window.open",
+                        "Content-Disposition", "BLOB", "パストラバーサル")
+                .source(PdfViewServlet.class)
+                .source(PdfFromFileServlet.class)
+                .source(PdfFromDbServlet.class)
+                .source(PdfResponse.class)
+                .source(PdfFolder.class)
+                .source(PdfDocumentDao.class)
+                .source(PdfDocument.class)
                 .build());
 
         // ------------------------------------------------------------------
