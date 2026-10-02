@@ -75,9 +75,19 @@ import com.example.servletsample.samples.design.ReceptionEntry;
 import com.example.servletsample.samples.file.Csv;
 import com.example.servletsample.samples.file.CsvDownloadServlet;
 import com.example.servletsample.samples.file.CsvExportServlet;
+import com.example.servletsample.samples.file.CsvImportError;
+import com.example.servletsample.samples.file.CsvImportResult;
+import com.example.servletsample.samples.file.CsvImportServlet;
+import com.example.servletsample.samples.file.CsvImportTemplateServlet;
+import com.example.servletsample.samples.file.CsvImporter;
 import com.example.servletsample.samples.file.CsvOptions;
+import com.example.servletsample.samples.file.CsvReader;
+import com.example.servletsample.samples.file.EmployeeCsvRow;
 import com.example.servletsample.samples.file.FileDownloadServlet;
 import com.example.servletsample.samples.file.FileUploadServlet;
+import com.example.servletsample.samples.file.ImportLogAppender;
+import com.example.servletsample.samples.file.ImportedEmployee;
+import com.example.servletsample.samples.file.ImportedEmployeeDao;
 import com.example.servletsample.samples.file.PdfDocument;
 import com.example.servletsample.samples.file.PdfDocumentDao;
 import com.example.servletsample.samples.file.PdfFolder;
@@ -568,6 +578,31 @@ final class SampleDefinitions {
                 .source(CsvOptions.class)
                 .source(SalesRecord.class)
                 .source(SalesRecords.class)
+                .build());
+
+        samples.add(Sample.builder("csv-import", Category.FILE)
+                .title("CSV 取り込み（入力チェックとエラー時のログ）")
+                .summary("アップロードされた CSV を 1 行ずつ確かめ、エラーは行番号つきでまとめて返す。"
+                        + "1 件でも誤りがあれば 1 件も登録しない。取り込み用の CSV（正常 / エラー入り / "
+                        + "Shift_JIS）をダウンロードして試せます。何が起きたかは Log4j 2 でログに残し、"
+                        + "その場で画面にも出します。")
+                .tags("CSV", "取り込み", "インポート", "アップロード", "入力チェック", "バリデーション",
+                        "Log4j", "ログ", "ログレベル", "ThreadContext", "MDC", "トランザクション",
+                        "文字コード", "Shift_JIS")
+                .source(CsvImportServlet.class)
+                .source(CsvImporter.class)
+                .source(EmployeeCsvRow.class)
+                .source(CsvReader.class)
+                .source(CsvImportError.class)
+                .source(CsvImportResult.class)
+                .source(ImportedEmployeeDao.class)
+                .source(ImportedEmployee.class)
+                .source(CsvImportTemplateServlet.class)
+                .source(SourceFile.of("/WEB-INF/classes/log4j2.xml", "log4j2.xml", "xml"))
+                .source(ImportLogAppender.class)
+                .testSource("com.example.servletsample.samples.file.CsvImporterTest")
+                .testSource("com.example.servletsample.samples.file.EmployeeCsvRowTest")
+                .testSource("com.example.servletsample.samples.file.CsvReaderTest")
                 .build());
 
         samples.add(Sample.builder("pdf-view", Category.FILE)

@@ -11,6 +11,7 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 import com.example.servletsample.samples.advanced.TransferDao;
+import com.example.servletsample.samples.file.ImportedEmployeeDao;
 import com.example.servletsample.samples.file.PdfDocumentDao;
 import com.example.servletsample.samples.file.StoredFileDao;
 import com.example.servletsample.samples.list.CustomerDao;
@@ -22,7 +23,8 @@ import com.example.servletsample.samples.test.JdbcOrderRepository;
  * アプリケーションの起動・停止に合わせて組み込みデータベースを準備するリスナー。
  *
  * <p>テーブルの作成そのものは、それぞれのサンプルの DAO
- * ({@link StoredFileDao} / {@link PdfDocumentDao} / {@link ProductDao} / {@link CustomerDao} /
+ * ({@link StoredFileDao} / {@link PdfDocumentDao} / {@link ImportedEmployeeDao} /
+ * {@link ProductDao} / {@link CustomerDao} /
  * {@link TransferDao} / {@link SharedSequenceDao} /
  * {@link JdbcOrderRepository}) が持っています。
  * ここではアプリの起動時にまとめて呼び出し、
@@ -37,6 +39,7 @@ public class DatabaseInitializer implements ServletContextListener {
         try {
             StoredFileDao.prepareTable();
             PdfDocumentDao.prepareTable();
+            ImportedEmployeeDao.prepareTable();
             ProductDao.prepareTable();
             CustomerDao.prepareTable();
             TransferDao.prepareTable();

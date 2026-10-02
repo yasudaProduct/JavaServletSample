@@ -793,6 +793,35 @@ pre.code-snippet code {
   font-size: inherit;
 }
 
+/* ログをそのまま見せる枠 (CSV 取り込みのサンプル)。1 行が長いので折り返さず横に流す */
+pre.log-view {
+  font-family: var(--site-mono);
+  font-size: .75rem;
+  line-height: 1.6;
+  background-color: #1f2430;
+  color: #d8dee9;
+  border-radius: 6px;
+  padding: .875rem 1rem;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.log-view__line--error {
+  color: #ff8a8a;
+}
+
+.log-view__line--warn {
+  color: #f5c86a;
+}
+
+.log-view__line--info {
+  color: #9fd7a7;
+}
+
+.log-view__line--debug {
+  color: #9aa5b8;
+}
+
 /* ---------------------------------------------------------------- 座学メモ */
 .badge-topic {
   background-color: #f1ecff;

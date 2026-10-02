@@ -86,7 +86,7 @@ final class TopicDefinitions {
                 .readingMinutes(9)
                 .tags("例外", "ログ", "スタックトレース", "ログレベル", "リクエストID",
                         "個人情報", "障害調査")
-                .relatedSamples("error-handling", "filter", "transaction")
+                .relatedSamples("error-handling", "csv-import", "filter", "transaction")
                 .build());
 
         topics.add(Topic.builder("security-overview", TopicGroup.PRACTICE)

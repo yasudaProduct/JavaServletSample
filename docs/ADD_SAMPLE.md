@@ -337,6 +337,24 @@ src/main/resources/messages_ja.properties  →  /WEB-INF/classes/messages_ja.pro
 
 判定の仕方は部品に、「社員コードは 5 桁」のような**業務の決めごとはフォームのクラスに**書きます。
 
+### ログを出す（Log4j 2）
+
+Log4j 2 を同梱しています。クラスごとにロガーを 1 つ持ち、`{}` で値を埋め込みます。
+
+```java
+private static final Logger LOG = LogManager.getLogger(FooServlet.class);
+
+LOG.info("登録しました id={}", id);
+LOG.error("登録に失敗しました id={}", id, e);   // 例外は最後の引数にそのまま渡す
+```
+
+- 設定は `src/main/resources/log4j2.xml`（標準出力と `$CATALINA_BASE/logs/servlet-sample.log` に出ます）
+- `com.example.servletsample` 配下は INFO 以上が出ます。DEBUG を見たいときは `<Logger>` を足します
+- テストのときは `src/test/resources/log4j2-test.xml` が使われ、何も出力しません
+- 氏名・メールアドレス・パスワードなどの**入力値はログに出さない**でください
+
+実例は `samples/file/CsvImporter.java`（レベルの使い分け、`ThreadContext` での ID 付け）です。
+
 ### ソースコード表示タグ
 
 ```jsp

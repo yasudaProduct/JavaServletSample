@@ -15,7 +15,7 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
 
-        <!-- JSTL / H2 を WEB-INF/lib へ。フォルダごと割り当てているので jar を足すだけで反映される -->
+        <!-- JSTL / H2 / Log4j を WEB-INF/lib へ。フォルダごと割り当てているので jar を足すだけで反映される -->
         <wb-resource deploy-path="/WEB-INF/lib" source-path="/lib/runtime"/>
 
         <!--

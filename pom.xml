@@ -22,6 +22,7 @@
     <jsp-api.version>2.3.3</jsp-api.version>
     <jstl.version>1.2</jstl.version>
     <h2.version>2.2.224</h2.version>
+    <log4j.version>2.26.1</log4j.version>
     <junit.version>5.10.2</junit.version>
   </properties>
 
@@ -77,6 +78,34 @@
       <version>${h2.version}</version>
     </dependency>
 
+    <!--
+      Log4j 2 : ログ出力 (サンプル「CSV 取り込み」で使用)。
+      設定ファイルは src/main/resources/log4j2.xml (ビルドで WEB-INF/classes へ)。
+
+        log4j-api  … コードから呼ぶ側 (Logger / LogManager / ThreadContext)
+        log4j-core … 実際に書き出す側 (log4j2.xml を読み、ファイルや標準出力へ出す)
+        log4j-web  … Web アプリの起動・停止に合わせて Log4j を始末する。
+                     無いと、アプリを入れ替えたときに Log4j のスレッドやファイルが残る
+
+      Log4j 1.x (log4j:log4j) は 2015 年に保守が終わっているので使いません。
+      2.x も 2.17.1 より古い版には Log4Shell (CVE-2021-44228) などの脆弱性があります。
+    -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-web</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+
     <!-- テスト -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -95,6 +124,16 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
+        <configuration>
+          <!--
+            注釈処理 (アノテーションプロセッサ) を止める。
+            log4j-core の jar には Log4j プラグインを作るための注釈処理が入っていて、
+            クラスパスに置くだけでコンパイルのたびに動きます
+            (JDK 21 では「Annotation processing is enabled ...」という注意が出ます)。
+            このアプリは Log4j のプラグインを作らないので要りません。build.xml も同じ指定です。
+          -->
+          <proc>none</proc>
+        </configuration>
       </plugin>
 
       <plugin>
