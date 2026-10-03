@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  テスト用の Log4j 2 の設定。
+
+  Log4j は log4j2-test.xml を log4j2.xml より先に探すので、
+  クラスパスにこれがあるとき (= テストのとき) はこちらが使われます。
+
+  テストの実行結果にログが混ざらないよう、Appender を 1 つも置いていません。
+  ログの中身を確かめるテスト (CsvImporterTest) は、
+  ImportLogAppender をつないで、出た行をメモリから読みます。
+  レベルは本番と同じにして、本番で出る行がテストでも出るようにしています。
+-->
+<Configuration status="warn">
+  <Loggers>
+    <Logger name="com.example.servletsample" level="info"/>
+    <Logger name="com.example.servletsample.samples.file" level="debug"/>
+    <Root level="warn"/>
+  </Loggers>
+</Configuration>

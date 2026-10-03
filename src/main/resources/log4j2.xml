@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ======================================================================
+   Log4j 2 の設定
+
+   置き場所は src/main/resources/log4j2.xml です。ビルドすると
+   WEB-INF/classes/log4j2.xml になり、Log4j が起動時に自動で読みます
+   (テストのときは src/test/resources/log4j2-test.xml が優先されます)。
+
+   設定は 3 つの部品の組み合わせです。
+
+     Appender … どこへ書くか (標準出力 / ファイル)
+     Layout   … どんな形の 1 行にするか (PatternLayout の書式)
+     Logger   … どのクラスの、どのレベル以上を書くか
+
+   status="warn" は「Log4j 自身の警告を出す」という指定です。
+   設定ミス (Appender の名前違いなど) があると、起動時に標準出力へ知らせてくれます。
+  ======================================================================
+-->
+<Configuration status="warn">
+
+  <Properties>
+    <!--
+      ログファイルの置き場所。Tomcat なら $CATALINA_BASE/logs (Docker では /usr/local/tomcat/logs)。
+      catalina.base が無いとき (Tomcat の外で動かしたとき) はカレントディレクトリの logs/ です。
+      ${sys:名前:-既定値} で「システムプロパティ、無ければ既定値」と書けます。
+    -->
+    <Property name="logDir">${sys:catalina.base:-.}/logs</Property>
+
+    <!--
+      1 行の書式。
+
+        %d{...}         日時
+        %-5level        レベル (5 文字幅に揃える)
+        [%t]            スレッド名 (http-nio-8080-exec-3 など)
+        [%X{importId}]  ThreadContext (MDC) に入れた取り込み ID。1 回の取り込みぶんを grep で拾える
+        %logger{1}      ロガー名 (= クラス名) の最後の 1 つだけ
+        %enc{%m}{CRLF}  メッセージ。改行を \r \n という文字に置き換えて 1 行に収める
+                        (利用者が送った文字列に改行が入っていても、偽のログ行を作らせない)
+        %n              改行
+        %ex{filters(…)} 例外のスタックトレース。Tomcat 内部の行は畳んで短くする
+
+      ImportLogAppender (画面にログを出す部品) も同じ書式にしています。
+    -->
+    <Property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] [%X{importId}] %logger{1} - %enc{%m}{CRLF}%n%ex{filters(org.apache.catalina,org.apache.coyote,org.apache.tomcat)}</Property>
+  </Properties>
+
+  <Appenders>
+    <!-- 標準出力。Docker なら docker compose logs -f tomcat で見えます -->
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="${pattern}" charset="UTF-8"/>
+    </Console>
+
+    <!--
+      ファイル。日付が変わるか 10 MB を超えたら、古いほうを圧縮して別名にします。
+        logs/servlet-sample.log                    … 今書いているファイル
+        logs/servlet-sample-2026-10-01-1.log.gz    … 前日までのもの
+      30 日より古いものは消します (消さないとディスクが埋まります)。
+    -->
+    <RollingFile name="File"
+                 fileName="${logDir}/servlet-sample.log"
+                 filePattern="${logDir}/servlet-sample-%d{yyyy-MM-dd}-%i.log.gz">
+      <PatternLayout pattern="${pattern}" charset="UTF-8"/>
+      <Policies>
+        <TimeBasedTriggeringPolicy/>
+        <SizeBasedTriggeringPolicy size="10 MB"/>
+      </Policies>
+      <DefaultRolloverStrategy max="20">
+        <Delete basePath="${logDir}" maxDepth="1">
+          <IfFileName glob="servlet-sample-*.log.gz"/>
+          <IfLastModified age="30d"/>
+        </Delete>
+      </DefaultRolloverStrategy>
+    </RollingFile>
+  </Appenders>
+
+  <Loggers>
+    <!-- このアプリのクラスは INFO 以上を出す -->
+    <Logger name="com.example.servletsample" level="info"/>
+
+    <!--
+      ファイルのサンプル (CSV 取り込み) は、動きを見せるために DEBUG まで出しています。
+      本番では info に戻します (DEBUG は量が多く、開発中に見るためのものです)。
+    -->
+    <Logger name="com.example.servletsample.samples.file" level="debug"/>
+
+    <!--
+      上の 2 つは Appender を持たず、ここ (Root) の Appender を使います (additivity)。
+      ライブラリなど、ほかのクラスのログは WARN 以上だけを出します。
+    -->
+    <Root level="warn">
+      <AppenderRef ref="Console"/>
+      <AppenderRef ref="File"/>
+    </Root>
+  </Loggers>
+
+</Configuration>

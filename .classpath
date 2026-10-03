@@ -15,11 +15,18 @@
 	<!-- 本体のソース。コンパイル結果は build/classes へ -->
 	<classpathentry kind="src" output="build/classes" path="src/main/java"/>
 
-	<!-- messages*.properties。クラスと同じ場所に置く必要があるため出力先も同じ -->
+	<!-- messages*.properties / log4j2.xml。クラスと同じ場所に置く必要があるため出力先も同じ -->
 	<classpathentry kind="src" output="build/classes" path="src/main/resources"/>
 
 	<!-- テストのソース。WAR には入れないので出力先を分ける -->
 	<classpathentry kind="src" output="build/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+
+	<!-- テスト用の設定ファイル (log4j2-test.xml)。テストのクラスと同じ場所に出す -->
+	<classpathentry kind="src" output="build/test-classes" path="src/test/resources">
 		<attributes>
 			<attribute name="test" value="true"/>
 		</attributes>
@@ -60,6 +67,9 @@
 	<!-- WAR の WEB-INF/lib に入るもの (デプロイメント・アセンブリーで割り当て済み) -->
 	<classpathentry kind="lib" path="lib/runtime/jstl-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/runtime/h2-2.2.224.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/log4j-api-2.26.1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/log4j-core-2.26.1.jar"/>
+	<classpathentry kind="lib" path="lib/runtime/log4j-web-2.26.1.jar"/>
 
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

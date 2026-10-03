@@ -170,6 +170,7 @@ Servlet が無いサンプルは `SampleDispatcherServlet` が JSP へ転送す�
 | API | Servlet 4.0 / JSP 2.3 / JSTL 1.2（`javax.*` 名前空間） |
 | 画面 | Bootstrap 4.6、jQuery 3.7（slim）、highlight.js 11 |
 | DB | H2 Database 2.2（組み込み・メモリ上で動作。別途 DB サーバは不要） |
+| ログ | Log4j 2.26（設定は `src/main/resources/log4j2.xml`） |
 | ビルド | Maven（WAR） |
 | テスト | JUnit 5 |
 
@@ -190,7 +191,7 @@ Bootstrap などのフロントエンド資産は `src/main/webapp/assets/vendor
 
 ```bash
 mvn clean package   # WAR をビルド（target/ROOT.war と target/ROOT/）
-mvn test            # テストを流す（約 690 件）
+mvn test            # テストを流す（約 830 件）
 ```
 
 ローカルに入れたくない場合は Docker 上の Maven を使えます:

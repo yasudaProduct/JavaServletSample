@@ -48,7 +48,7 @@ Docker と Maven を使わず、**Eclipse とそれに同梱されている Ant 
 
 | 項目 | 設定値 | 実体 |
 | --- | --- | --- |
-| ソース・フォルダ | `src/main/java` / `src/main/resources` / `src/test/java` | `.classpath` |
+| ソース・フォルダ | `src/main/java` / `src/main/resources` / `src/test/java` / `src/test/resources` | `.classpath` |
 | 出力先 | `build/classes`（テストは `build/test-classes`） | `.classpath` |
 | ビルド・パス | `lib/provided` と `lib/runtime` の jar、JUnit 5 | `.classpath` |
 | ファセット | `jst.web 4.0` / `java 17` | `.settings/org.eclipse.wst.common.project.facet.core.xml` |
@@ -61,8 +61,8 @@ Docker と Maven を使わず、**Eclipse とそれに同梱されている Ant 
 | --- | --- |
 | `/src/main/webapp` | `/`（`WEB-INF/web.xml`, `views`, `tags`, `tlds`, `assets`, `META-INF/context.xml`） |
 | `/src/main/java` | `/WEB-INF/classes`（コンパイル結果） |
-| `/src/main/resources` | `/WEB-INF/classes`（`messages*.properties`） |
-| `/lib/runtime` | `/WEB-INF/lib`（JSTL / H2） |
+| `/src/main/resources` | `/WEB-INF/classes`（`messages*.properties` / `log4j2.xml`） |
+| `/lib/runtime` | `/WEB-INF/lib`（JSTL / H2 / Log4j） |
 | `servlet-sample-shared` プロジェクト | `/WEB-INF/lib/servlet-sample-shared-1.0.0.jar` |
 
 > **ビルド・パスとデプロイメント・アセンブリーは別物です。**
@@ -174,7 +174,7 @@ ant clean war
 | フォルダ | 中身 | WAR に入るか |
 | --- | --- | --- |
 | `lib/provided/` | `javax.servlet-api` / `javax.servlet.jsp-api` | **入れない**（Tomcat が持っている） |
-| `lib/runtime/` | `jstl` / `h2` | 入れる（`WEB-INF/lib`） |
+| `lib/runtime/` | `jstl` / `h2` / `log4j-api` / `log4j-core` / `log4j-web` | 入れる（`WEB-INF/lib`） |
 | `lib/test/` | `junit-platform-console-standalone` | 入れない（テスト実行用） |
 
 `servlet-api` を `WEB-INF/lib` に入れると Tomcat が持っているものと二重になり、

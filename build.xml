@@ -40,6 +40,7 @@
   <property name="src.res.dir"     value="src/main/resources"/>
   <property name="webapp.dir"      value="src/main/webapp"/>
   <property name="test.java.dir"   value="src/test/java"/>
+  <property name="test.res.dir"    value="src/test/resources"/>
 
   <!--
     共通ライブラリ (別プロジェクト)。
@@ -159,9 +160,11 @@
       <classpath refid="classpath.compile"/>
       <!-- 日本語のソースなので、警告は出させておく -->
       <compilerarg value="-Xlint:all,-serial"/>
+      <!-- log4j-core に入っている注釈処理を動かさない (pom.xml の <proc>none</proc> と同じ) -->
+      <compilerarg value="-proc:none"/>
     </javac>
 
-    <!-- messages*.properties を WEB-INF/classes に入れる (国際化のサンプルが使う) -->
+    <!-- messages*.properties と log4j2.xml を WEB-INF/classes に入れる -->
     <copy todir="${classes.dir}">
       <fileset dir="${src.res.dir}"/>
     </copy>
@@ -186,7 +189,7 @@
       <fileset dir="${classes.dir}"/>
     </copy>
 
-    <!-- ③ 実行時に必要な jar (JSTL / H2) と、自分でビルドした共通ライブラリ -->
+    <!-- ③ 実行時に必要な jar (JSTL / H2 / Log4j) と、自分でビルドした共通ライブラリ -->
     <copy todir="${war.dir}/WEB-INF/lib">
       <fileset dir="lib/runtime" includes="*.jar"/>
       <fileset file="${shared.jar}"/>
@@ -324,7 +327,17 @@
            includeantruntime="false"
            debug="true">
       <classpath refid="classpath.test"/>
+      <compilerarg value="-proc:none"/>
     </javac>
+
+    <!--
+      テスト用の設定ファイル (log4j2-test.xml)。
+      Log4j は log4j2-test.xml を log4j2.xml より先に探すので、
+      テストのときだけこちらが使われます (Maven の src/test/resources と同じ扱い)。
+    -->
+    <copy todir="${test.classes.dir}">
+      <fileset dir="${test.res.dir}"/>
+    </copy>
   </target>
 
   <target name="test" depends="shared-test,test-compile" description="JUnit 5 のテストを実行する (共通ライブラリ + アプリ)">
